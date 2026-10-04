@@ -432,7 +432,7 @@ export default function Home() {
             <button
               onClick={toggleTheme}
               title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
-              className="border-2 border-zinc-900 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 px-2.5 py-1 text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#52525b] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-1.5"
+              className="border-2 border-zinc-900 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-300 hover:text-zinc-950 dark:hover:bg-zinc-700 dark:hover:text-zinc-100 text-zinc-900 dark:text-zinc-100 px-2.5 py-1 text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#52525b] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-1.5"
             >
               {isDark ? (
                 <>
@@ -607,20 +607,20 @@ export default function Home() {
                         setSelectedGenre(isSelected ? "ALL" : item.genre)
                       }
                       title={`Click to filter by ${item.genre}`}
-                      className="group cursor-pointer select-none"
+                      className="group cursor-pointer select-none p-1.5 -mx-1.5 border border-transparent hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/60 transition-all"
                     >
                       <div className="flex items-center justify-between text-xs font-mono mb-1">
                         <span
                           className={`font-bold flex items-center gap-1.5 ${
                             isSelected
                               ? "text-emerald-600 dark:text-emerald-400 underline"
-                              : "text-zinc-700 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                              : "text-zinc-700 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
                           }`}
                         >
                           <span>▶</span>
                           <span>{item.genre}</span>
                         </span>
-                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 font-mono">
                           {item.ccu.toLocaleString()} CCU ({item.pct}%)
                         </span>
                       </div>
@@ -691,14 +691,14 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* View Mode Tabs */}
+              {/* View Mode Tabs with High Contrast Dark Hover */}
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleModeChange("leaderboard")}
                   className={`px-3 py-1.5 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
                     viewMode === "leaderboard"
-                      ? "border-zinc-900 bg-emerald-400 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-500"
-                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                      ? "border-zinc-900 bg-emerald-400 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-500 hover:bg-emerald-300 dark:hover:bg-emerald-400"
+                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white dark:hover:border-zinc-500"
                   }`}
                 >
                   🔥 LEADERBOARD
@@ -707,8 +707,8 @@ export default function Home() {
                   onClick={() => handleModeChange("breakout")}
                   className={`px-3 py-1.5 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
                     viewMode === "breakout"
-                      ? "border-zinc-900 bg-purple-400 text-zinc-950 dark:border-purple-400 dark:bg-purple-500"
-                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                      ? "border-zinc-900 bg-purple-400 text-zinc-950 dark:border-purple-400 dark:bg-purple-500 hover:bg-purple-300 dark:hover:bg-purple-400"
+                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white dark:hover:border-zinc-500"
                   }`}
                 >
                   🚀 RISING STARS
@@ -718,7 +718,7 @@ export default function Home() {
 
             {/* Row 2: Genre Filters & Limit Selector */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-zinc-200 dark:border-zinc-700/80">
-              {/* Genre Pills */}
+              {/* Genre Pills with High Contrast Dark Hover */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
                 <span className="font-bold uppercase text-[11px] text-zinc-500 dark:text-zinc-400 mr-1 select-none">
                   GENRE:
@@ -730,7 +730,7 @@ export default function Home() {
                     className={`whitespace-nowrap px-2 py-0.5 text-[11px] font-bold border uppercase transition-all ${
                       selectedGenre === genre
                         ? "border-emerald-600 bg-emerald-500 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-400 shadow-[1px_1px_0px_0px_#000]"
-                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white dark:hover:border-zinc-500"
                     }`}
                   >
                     {genre === "ALL" ? "ALL GENRES" : genre}
@@ -750,7 +750,7 @@ export default function Home() {
                     className={`px-2 py-0.5 text-[11px] font-bold border transition-all ${
                       rowLimit === limit
                         ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-300 dark:bg-zinc-100 dark:text-zinc-950 shadow-[1px_1px_0px_0px_#000]"
-                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white"
                     }`}
                   >
                     {limit}
@@ -786,13 +786,13 @@ export default function Home() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider select-none">
+                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider select-none">
                     <th className="py-3 px-3 w-14 text-center border-r border-zinc-300 dark:border-zinc-800">
                       RANK
                     </th>
                     <th
                       onClick={() => handleSort("name")}
-                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span>GAME TITLE</span>
@@ -801,7 +801,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("genre")}
-                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span>GENRE</span>
@@ -810,7 +810,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("ccu")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>CCU</span>
@@ -819,7 +819,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("trend")}
-                      className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-center">
                         <span>TREND & TRAJECTORY</span>
@@ -828,7 +828,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("visits")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>VISITS</span>
@@ -843,7 +843,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("approval")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>APPROVAL</span>
@@ -858,7 +858,7 @@ export default function Home() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800/80 font-mono">
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 font-mono">
                   {loading ? (
                     Array.from({ length: 10 }).map((_, idx) => (
                       <tr
@@ -934,10 +934,10 @@ export default function Home() {
                       return (
                         <tr
                           key={String(game.universe_id) + idx}
-                          className="hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                          className="group/row hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
                         >
                           {/* Rank Badge */}
-                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800/80">
+                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
                             <span
                               className={`inline-block px-1.5 py-0.5 text-[11px] ${rankClass}`}
                             >
@@ -946,7 +946,7 @@ export default function Home() {
                           </td>
 
                           {/* Game Title with Direct Roblox Link */}
-                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80">
+                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800">
                             <a
                               href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
                                 game.name
@@ -954,7 +954,7 @@ export default function Home() {
                               target="_blank"
                               rel="noopener noreferrer"
                               title={`Play ${game.name} on Roblox`}
-                              className="group inline-flex items-center gap-1 font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                              className="group inline-flex items-center gap-1 font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 group-hover/row:text-emerald-600 dark:group-hover/row:text-emerald-400 transition-colors"
                             >
                               <span className="group-hover:underline underline-offset-2">
                                 {game.name}
@@ -963,7 +963,7 @@ export default function Home() {
                                 ↗
                               </span>
                             </a>
-                            <div className="text-[10px] text-zinc-500 dark:text-zinc-500 font-mono mt-0.5 flex items-center gap-2">
+                            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 flex items-center gap-2">
                               <span>ID: {String(game.universe_id)}</span>
                               <span>•</span>
                               <a
@@ -980,11 +980,11 @@ export default function Home() {
                           </td>
 
                           {/* Stylized Pixel Genre Badge (Clickable to Filter) */}
-                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
                             <button
                               onClick={() => setSelectedGenre(game.genre || "Unclassified")}
                               title={`Filter by genre: ${game.genre || "Unclassified"}`}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] transition-all"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-300 hover:text-zinc-950 dark:hover:bg-zinc-700 dark:hover:text-white text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] transition-all"
                             >
                               <span className="text-emerald-500">▶</span>
                               <span>{game.genre || "UNCLASSIFIED"}</span>
@@ -992,14 +992,14 @@ export default function Home() {
                           </td>
 
                           {/* CCU */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
                             <span className="inline-block px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-black text-xs shadow-[2px_2px_0px_0px_#059669]">
                               {Number(game.ccu).toLocaleString()} CCU
                             </span>
                           </td>
 
                           {/* Trend & Trajectory Sparkline */}
-                          <td className="py-3 px-4 text-center border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                          <td className="py-3 px-4 text-center border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
                             <div className="flex items-center justify-center gap-2">
                               <Sparkline
                                 data={game.ccu_history}
@@ -1036,22 +1036,22 @@ export default function Home() {
                           </td>
 
                           {/* Total Visits */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 font-bold text-zinc-700 dark:text-zinc-300">
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 font-bold text-zinc-700 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white">
                             {Number(game.visits).toLocaleString()}
                           </td>
 
                           {/* Upvotes */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 text-emerald-600 dark:text-emerald-400 font-bold">
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 text-emerald-600 dark:text-emerald-400 font-bold">
                             ▲ {up.toLocaleString()}
                           </td>
 
                           {/* Downvotes */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 text-rose-600 dark:text-rose-400 font-bold">
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-400 font-bold">
                             ▼ {down.toLocaleString()}
                           </td>
 
                           {/* Approval Rating */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 font-bold">
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 font-bold">
                             {rating !== null ? (
                               <span
                                 className={`px-1.5 py-0.5 border text-[11px] ${
@@ -1070,17 +1070,17 @@ export default function Home() {
                           </td>
 
                           {/* Inspector Action Button */}
-                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800/80">
+                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
                             <button
                               onClick={() => setSelectedGame(game)}
-                              className="px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-200 dark:bg-zinc-800 hover:bg-emerald-400 dark:hover:bg-emerald-500 hover:text-zinc-950 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                              className="px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-emerald-400 hover:text-zinc-950 dark:hover:bg-emerald-400 dark:hover:text-zinc-950 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_#000] dark:shadow-[1px_1px_0px_0px_#3f3f46] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                             >
                               🔍 INFO
                             </button>
                           </td>
 
                           {/* Snapshot Timestamp */}
-                          <td className="py-3 px-4 text-right text-zinc-500 dark:text-zinc-400 whitespace-nowrap text-[11px]">
+                          <td className="py-3 px-4 text-right text-zinc-500 dark:text-zinc-400 group-hover/row:text-zinc-700 dark:group-hover/row:text-zinc-200 whitespace-nowrap text-[11px]">
                             {game.timestamp
                               ? new Date(game.timestamp).toLocaleTimeString(
                                   [],
