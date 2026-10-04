@@ -87,6 +87,103 @@ function Sparkline({
   );
 }
 
+function DetailChart({ data }: { data?: number[] }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-xs text-zinc-500 font-mono py-6 text-center">
+        [NO_HISTORICAL_TELEMETRY_RECORDED]
+      </div>
+    );
+  }
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const height = 90;
+  const padding = 15;
+
+  const points = data
+    .map((val, idx) => {
+      const x =
+        padding + (idx / Math.max(data.length - 1, 1)) * (360 - 2 * padding);
+      const y =
+        height - padding - ((val - min) / range) * (height - 2 * padding);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <div className="w-full border-2 border-zinc-800 dark:border-zinc-700 bg-zinc-950 p-3 space-y-2 shadow-[2px_2px_0px_0px_#000]">
+      <div className="flex items-center justify-between text-[10px] text-zinc-400 font-mono uppercase">
+        <span>MIN: {min.toLocaleString()} CCU</span>
+        <span className="text-emerald-400 font-bold">
+          PEAK: {max.toLocaleString()} CCU
+        </span>
+      </div>
+      <div className="w-full overflow-x-auto">
+        <svg viewBox="0 0 360 90" className="w-full h-24 overflow-visible">
+          {/* Grid lines */}
+          <line
+            x1="0"
+            y1="15"
+            x2="360"
+            y2="15"
+            stroke="#27272a"
+            strokeDasharray="3 3"
+          />
+          <line
+            x1="0"
+            y1="45"
+            x2="360"
+            y2="45"
+            stroke="#27272a"
+            strokeDasharray="3 3"
+          />
+          <line
+            x1="0"
+            y1="75"
+            x2="360"
+            y2="75"
+            stroke="#27272a"
+            strokeDasharray="3 3"
+          />
+
+          {/* Polyline */}
+          <polyline
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={points}
+          />
+          {/* Data Circles */}
+          {data.map((val, idx) => {
+            const cx =
+              padding +
+              (idx / Math.max(data.length - 1, 1)) * (360 - 2 * padding);
+            const cy =
+              height - padding - ((val - min) / range) * (height - 2 * padding);
+            return (
+              <circle
+                key={idx}
+                cx={cx}
+                cy={cy}
+                r="3.5"
+                fill="#10b981"
+                className="hover:scale-125 transition-all"
+              />
+            );
+          })}
+        </svg>
+      </div>
+      <div className="flex justify-between text-[9px] text-zinc-500 font-mono">
+        <span>EARLIEST SNAPSHOT</span>
+        <span>LATEST: {data[data.length - 1]?.toLocaleString()} CCU</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [metrics, setMetrics] = useState<GameMetric[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,12 +198,24 @@ export default function Home() {
   const [sortColumn, setSortColumn] = useState<string>("ccu");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [showMarketShare, setShowMarketShare] = useState<boolean>(true);
+  const [selectedGame, setSelectedGame] = useState<GameMetric | null>(null);
 
   // Synchronize dark mode state with html class on mount
   useEffect(() => {
     const root = document.documentElement;
     const hasDark = root.classList.contains("dark");
     setIsDark(hasDark);
+  }, []);
+
+  // Listen for Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedGame(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const toggleTheme = () => {
@@ -310,7 +419,7 @@ export default function Home() {
             <div className="h-4 w-[2px] bg-zinc-400 dark:bg-zinc-600 hidden sm:block" />
             <div className="text-xs font-bold tracking-tight uppercase flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
               <span>👾</span>
-              <span>ROBLOX_TRENDS_CLI v2.4</span>
+              <span>ROBLOX_TRENDS_CLI v2.5</span>
               <span className="hidden md:inline text-zinc-500 dark:text-zinc-400">
                 [SESSION: LIVE_MOTHERDUCK]
               </span>
@@ -366,7 +475,7 @@ export default function Home() {
             <span>[STATUS: ONLINE]</span>
             <span>[TOTAL_POOL: {metrics.length} GAMES]</span>
             <span>[CLUSTER_ENGINE: KMEANS_NLP]</span>
-            <span>[SPARKLINE_TELEMETRY: ACTIVE]</span>
+            <span>[INTERACTIVE_INSPECTOR: ENABLED]</span>
           </div>
         </div>
 
@@ -741,6 +850,9 @@ export default function Home() {
                         {renderSortIndicator("approval")}
                       </div>
                     </th>
+                    <th className="py-3 px-3 text-center border-r border-zinc-300 dark:border-zinc-800">
+                      INSPECT
+                    </th>
                     <th className="py-3 px-4 text-right">
                       SNAPSHOT
                     </th>
@@ -780,6 +892,9 @@ export default function Home() {
                         <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
                           <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
+                        <td className="py-3.5 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                        </td>
                         <td className="py-3.5 px-4 text-right">
                           <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
@@ -788,7 +903,7 @@ export default function Home() {
                   ) : processedMetrics.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={10}
+                        colSpan={11}
                         className="py-12 text-center text-zinc-500 font-mono"
                       >
                         [NO_MATCHING_RECORDS_FOUND]
@@ -954,6 +1069,16 @@ export default function Home() {
                             )}
                           </td>
 
+                          {/* Inspector Action Button */}
+                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800/80">
+                            <button
+                              onClick={() => setSelectedGame(game)}
+                              className="px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-200 dark:bg-zinc-800 hover:bg-emerald-400 dark:hover:bg-emerald-500 hover:text-zinc-950 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                            >
+                              🔍 INFO
+                            </button>
+                          </td>
+
                           {/* Snapshot Timestamp */}
                           <td className="py-3 px-4 text-right text-zinc-500 dark:text-zinc-400 whitespace-nowrap text-[11px]">
                             {game.timestamp
@@ -987,6 +1112,150 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Retro Game Inspector Modal Overlay */}
+      {selectedGame && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-100">
+          <div
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-zinc-900 dark:border-zinc-600 bg-white dark:bg-zinc-900 shadow-[8px_8px_0px_0px_#000] dark:shadow-[8px_8px_0px_0px_#27272a] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Title Bar */}
+            <div className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 px-4 py-2.5 flex items-center justify-between select-none">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 bg-rose-500 border border-black inline-block" />
+                <span className="w-2.5 h-2.5 bg-amber-400 border border-black inline-block" />
+                <span className="w-2.5 h-2.5 bg-emerald-500 border border-black inline-block" />
+                <span className="text-xs font-bold uppercase ml-2 text-zinc-800 dark:text-zinc-200">
+                  INSPECTOR // {selectedGame.name}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedGame(null)}
+                className="border border-zinc-900 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-700 hover:bg-rose-500 hover:text-white px-2 py-0.5 text-xs font-bold uppercase shadow-[1px_1px_0px_0px_#000]"
+              >
+                [ESC ✕]
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 sm:p-6 space-y-4 font-mono text-xs">
+              {/* Header Box */}
+              <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 p-4 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-base sm:text-lg font-black text-zinc-950 dark:text-zinc-100">
+                    {selectedGame.name}
+                  </h2>
+                  <a
+                    href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                      selectedGame.name
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 border-2 border-zinc-900 dark:border-emerald-500 bg-emerald-400 text-zinc-950 font-bold uppercase shadow-[2px_2px_0px_0px_#000] hover:bg-emerald-300"
+                  >
+                    PLAY ON ROBLOX ↗
+                  </a>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-[11px] text-zinc-600 dark:text-zinc-400">
+                  <span>UNIVERSE_ID: {String(selectedGame.universe_id)}</span>
+                  <span>•</span>
+                  <span>GENRE: {selectedGame.genre || "UNCLASSIFIED"}</span>
+                  {selectedGame.created_at && (
+                    <>
+                      <span>•</span>
+                      <span>
+                        RELEASED:{" "}
+                        {new Date(selectedGame.created_at).toLocaleDateString()}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Key Stats Bento */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="border border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950 p-2.5">
+                  <div className="text-[10px] uppercase font-bold text-zinc-500">
+                    CURRENT CCU
+                  </div>
+                  <div className="mt-1 text-base font-black text-emerald-600 dark:text-emerald-400">
+                    {Number(selectedGame.ccu).toLocaleString()}
+                  </div>
+                </div>
+                <div className="border border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950 p-2.5">
+                  <div className="text-[10px] uppercase font-bold text-zinc-500">
+                    RECORDED PEAK
+                  </div>
+                  <div className="mt-1 text-base font-black text-amber-500">
+                    {Number(selectedGame.peak_ccu || selectedGame.ccu).toLocaleString()}
+                  </div>
+                </div>
+                <div className="border border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950 p-2.5">
+                  <div className="text-[10px] uppercase font-bold text-zinc-500">
+                    TOTAL VISITS
+                  </div>
+                  <div className="mt-1 text-base font-black text-zinc-800 dark:text-zinc-200 truncate">
+                    {Number(selectedGame.visits).toLocaleString()}
+                  </div>
+                </div>
+                <div className="border border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-950 p-2.5">
+                  <div className="text-[10px] uppercase font-bold text-zinc-500">
+                    24H VELOCITY
+                  </div>
+                  <div className="mt-1 text-base font-black">
+                    {selectedGame.ccu_pct_change !== null &&
+                    selectedGame.ccu_pct_change !== undefined ? (
+                      <span
+                        className={
+                          selectedGame.ccu_pct_change >= 0
+                            ? "text-emerald-500"
+                            : "text-rose-500"
+                        }
+                      >
+                        {selectedGame.ccu_pct_change >= 0 ? "+" : ""}
+                        {selectedGame.ccu_pct_change}%
+                      </span>
+                    ) : (
+                      <span className="text-cyan-400">NEW ★</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Historical Telemetry Graph */}
+              <div>
+                <div className="text-[11px] uppercase font-bold text-zinc-500 mb-1.5 flex items-center gap-1.5">
+                  <span>📈</span>
+                  <span>HISTORICAL_CONCURRENT_PLAYER_TRAJECTORY</span>
+                </div>
+                <DetailChart data={selectedGame.ccu_history} />
+              </div>
+
+              {/* Description Box */}
+              <div>
+                <div className="text-[11px] uppercase font-bold text-zinc-500 mb-1.5 flex items-center gap-1.5">
+                  <span>📜</span>
+                  <span>EXPERIENCE_SYNOPSIS_&amp;_METADATA</span>
+                </div>
+                <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 p-3 max-h-40 overflow-y-auto whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-700 dark:text-zinc-300">
+                  {selectedGame.description || "[NO_DESCRIPTION_PROVIDED]"}
+                </div>
+              </div>
+
+              {/* Footer action */}
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setSelectedGame(null)}
+                  className="px-4 py-1.5 border-2 border-zinc-900 dark:border-zinc-600 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-950 dark:text-zinc-100 font-bold uppercase shadow-[2px_2px_0px_0px_#000]"
+                >
+                  [CLOSE INSPECTOR]
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
