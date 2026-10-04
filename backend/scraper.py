@@ -6,7 +6,11 @@ from pathlib import Path
 import sys
 from typing import Any, Dict, List, Optional
 import aiohttp
+from dotenv import load_dotenv
 import duckdb
+
+load_dotenv('../.env')
+load_dotenv()
 
 # Ensure UTF-8 output on Windows terminal
 if hasattr(sys.stdout, "reconfigure"):

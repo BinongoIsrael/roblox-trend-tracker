@@ -3,7 +3,11 @@
 import os
 from pathlib import Path
 from typing import Any, Optional
+from dotenv import load_dotenv
 import duckdb
+
+load_dotenv('../.env')
+load_dotenv()
 
 DB_PATH = Path(__file__).resolve().parent / "roblox_trends.duckdb"
 

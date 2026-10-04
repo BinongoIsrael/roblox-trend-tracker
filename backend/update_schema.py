@@ -5,7 +5,11 @@ from pathlib import Path
 import re
 import sys
 from typing import Any, Optional
+from dotenv import load_dotenv
 import duckdb
+
+load_dotenv('../.env')
+load_dotenv()
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
