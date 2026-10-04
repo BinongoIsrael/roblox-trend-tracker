@@ -8,11 +8,24 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      colors: {
-        "brand-darkest": "#091413",
-        "brand-dark": "#285A48",
-        "brand-main": "#408A71",
-        "brand-light": "#B0E4CC",
+      fontFamily: {
+        mono: [
+          "var(--font-geist-mono)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "Liberation Mono",
+          "Courier New",
+          "monospace",
+        ],
+      },
+      boxShadow: {
+        pixel: "3px 3px 0px 0px rgba(0, 0, 0, 1)",
+        "pixel-lg": "5px 5px 0px 0px rgba(0, 0, 0, 1)",
+        "pixel-dark": "3px 3px 0px 0px rgba(255, 255, 255, 0.2)",
+        "pixel-dark-lg": "5px 5px 0px 0px rgba(255, 255, 255, 0.2)",
       },
     },
   },

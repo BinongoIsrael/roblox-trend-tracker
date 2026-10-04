@@ -20,7 +20,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState<boolean>(true);
 
-  // Synchronize dark mode state with html tag on mount
+  // Synchronize dark mode state with html class on mount
   useEffect(() => {
     const root = document.documentElement;
     const hasDark = root.classList.contains("dark");
@@ -76,362 +76,370 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-brand-light text-brand-darkest dark:bg-brand-darkest dark:text-brand-light flex flex-col font-sans transition-colors duration-200">
-      {/* Top Header */}
-      <header className="border-b border-brand-main/30 bg-white/70 dark:bg-brand-darkest/80 dark:border-brand-dark/50 backdrop-blur-md sticky top-0 z-20 transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-mono flex flex-col transition-colors duration-150 p-3 sm:p-6 lg:p-8">
+      {/* Outer Retro Terminal Window Frame */}
+      <div className="max-w-7xl mx-auto w-full border-2 border-zinc-900 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-[6px_6px_0px_0px_#09090b] dark:shadow-[6px_6px_0px_0px_#27272a] flex flex-col flex-1">
+        {/* Terminal Title Bar */}
+        <div className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 px-4 py-2.5 flex items-center justify-between select-none">
+          {/* Left: Pixel Arcade Window Buttons & Title */}
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-brand-main/20 border border-brand-main text-brand-dark dark:text-brand-light flex items-center justify-center font-bold text-base shadow-sm">
-              🎮
+            <div className="flex items-center space-x-1.5">
+              <span className="w-3 h-3 border border-zinc-900 dark:border-zinc-600 bg-rose-500 inline-block shadow-[1px_1px_0px_0px_#000]" />
+              <span className="w-3 h-3 border border-zinc-900 dark:border-zinc-600 bg-amber-400 inline-block shadow-[1px_1px_0px_0px_#000]" />
+              <span className="w-3 h-3 border border-zinc-900 dark:border-zinc-600 bg-emerald-500 inline-block shadow-[1px_1px_0px_0px_#000]" />
             </div>
-            <div>
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-brand-darkest dark:text-brand-light flex items-center gap-2">
-                Roblox Trend Tracker
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-main/20 text-brand-dark dark:text-brand-light border border-brand-main/40">
-                  MotherDuck Live
-                </span>
-              </h1>
+            <div className="h-4 w-[2px] bg-zinc-400 dark:bg-zinc-600 hidden sm:block" />
+            <div className="text-xs font-bold tracking-tight uppercase flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
+              <span>👾</span>
+              <span>ROBLOX_TRENDS_CLI v2.0</span>
+              <span className="hidden md:inline text-zinc-500 dark:text-zinc-400">
+                [SESSION: LIVE_MOTHERDUCK]
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Light / Dark Mode Toggle Button */}
+          {/* Right: Retro Action Buttons */}
+          <div className="flex items-center space-x-2">
+            {/* Light / Dark Mode Pixel Switch */}
             <button
               onClick={toggleTheme}
               title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/80 dark:bg-brand-dark/40 hover:bg-brand-main/20 dark:hover:bg-brand-dark/70 text-brand-darkest dark:text-brand-light border border-brand-main/40 dark:border-brand-dark/60 transition shadow-xs"
+              className="border-2 border-zinc-900 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 px-2.5 py-1 text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#52525b] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-1.5"
             >
               {isDark ? (
-                // Sun Icon (Switch to Light)
-                <svg
-                  className="w-4 h-4 text-amber-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+                <>
+                  <span className="text-amber-300">☀️</span>
+                  <span className="hidden sm:inline">LIGHT_MODE</span>
+                </>
               ) : (
-                // Moon Icon (Switch to Dark)
-                <svg
-                  className="w-4 h-4 text-brand-dark"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
+                <>
+                  <span className="text-indigo-600">🌙</span>
+                  <span className="hidden sm:inline">DARK_MODE</span>
+                </>
               )}
             </button>
 
-            {/* Refresh Button */}
+            {/* Refresh Pixel Button */}
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-main text-white dark:bg-brand-dark hover:bg-brand-dark dark:hover:bg-brand-main/80 border border-brand-dark/30 dark:border-brand-main/40 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+              className="border-2 border-zinc-900 dark:border-zinc-600 bg-emerald-400 text-zinc-950 dark:bg-emerald-500 hover:bg-emerald-300 dark:hover:bg-emerald-400 px-3 py-1 text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#52525b] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
-              <svg
-                className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Refresh
+              <span className={loading ? "animate-spin" : ""}>⟳</span>
+              <span>FETCH</span>
             </button>
           </div>
         </div>
-      </header>
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white/80 dark:bg-brand-darkest/70 border border-brand-main/30 dark:border-brand-dark/60 rounded-xl p-5 shadow-sm transition-colors">
-            <span className="text-xs font-semibold text-brand-dark dark:text-brand-light/80 uppercase tracking-wider">
-              Top 10 Aggregate CCU
+        {/* Command Line / Console Prompt Header */}
+        <div className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/60 p-4 space-y-1">
+          <div className="text-xs text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+              SYS@MOTHERDUCK:~$
             </span>
-            <div className="mt-2 text-2xl font-bold text-brand-dark dark:text-brand-light tracking-tight">
-              {loading ? "..." : totalCCU.toLocaleString()}
-            </div>
-            <p className="mt-1 text-xs text-brand-dark/70 dark:text-brand-light/60">
-              Live concurrent players across top 10 titles
-            </p>
+            <span className="text-zinc-800 dark:text-zinc-200">
+              run query --table games+metrics --order ccu_desc --limit 10
+            </span>
+            <span className="pixel-cursor text-emerald-500 font-black">▋</span>
           </div>
-
-          <div className="bg-white/80 dark:bg-brand-darkest/70 border border-brand-main/30 dark:border-brand-dark/60 rounded-xl p-5 shadow-sm transition-colors">
-            <span className="text-xs font-semibold text-brand-dark dark:text-brand-light/80 uppercase tracking-wider">
-              #1 Ranked Title
-            </span>
-            <div className="mt-2 text-lg font-bold text-brand-darkest dark:text-brand-light truncate">
-              {loading ? "..." : metrics[0]?.name || "N/A"}
-            </div>
-            <p className="mt-1 text-xs text-brand-dark/70 dark:text-brand-light/60">
-              {metrics[0]
-                ? `${Number(metrics[0].ccu).toLocaleString()} active players`
-                : "No data available"}
-            </p>
-          </div>
-
-          <div className="bg-white/80 dark:bg-brand-darkest/70 border border-brand-main/30 dark:border-brand-dark/60 rounded-xl p-5 shadow-sm transition-colors">
-            <span className="text-xs font-semibold text-brand-dark dark:text-brand-light/80 uppercase tracking-wider">
-              Pipeline Status
-            </span>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-brand-main animate-pulse" />
-              <span className="text-sm font-bold text-brand-darkest dark:text-brand-light">
-                MotherDuck Connected
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-brand-dark/70 dark:text-brand-light/60">
-              NLP Genre Classification & Metrics
-            </p>
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400 flex flex-wrap gap-4 pt-1">
+            <span>[DB: md:roblox_trends]</span>
+            <span>[STATUS: ONLINE]</span>
+            <span>[RETENTION: 30-DAY ROLLING]</span>
+            <span>[CLUSTER_ENGINE: KMEANS_NLP]</span>
           </div>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-700 dark:text-red-300 flex items-start justify-between">
-            <div className="flex gap-3">
-              <span className="text-red-500 text-lg">⚠️</span>
-              <div>
-                <h3 className="text-sm font-semibold">Failed to fetch metrics</h3>
-                <p className="text-xs opacity-90 mt-0.5">{error}</p>
+        {/* Inner Content Area */}
+        <div className="p-4 sm:p-6 space-y-6 flex-1">
+          {/* KPI Stat Blocks (Pixel Styled) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Stat 1 */}
+            <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a] relative">
+              <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
+                <span>[01] // TOTAL_TOP10_CCU</span>
+                <span className="text-emerald-500">● LIVE</span>
               </div>
-            </div>
-            <button
-              onClick={handleRefresh}
-              className="text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 px-3 py-1.5 rounded-md transition border border-red-500/30"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Leaderboard Table Container */}
-        <div className="bg-white/85 dark:bg-brand-darkest/80 border border-brand-main/30 dark:border-brand-dark/60 rounded-xl shadow-lg overflow-hidden backdrop-blur-sm transition-colors">
-          <div className="px-5 py-4 border-b border-brand-main/20 dark:border-brand-dark/60 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-brand-darkest dark:text-brand-light">
-                Top 10 Trending Games & Genre Analytics
-              </h2>
-              <p className="text-xs text-brand-dark/80 dark:text-brand-light/70 mt-0.5">
-                Real-time leaderboard ranked by CCU with machine-learning sub-genre clustering
+              <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                {loading ? "FETCHING..." : totalCCU.toLocaleString()}
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Sum of active concurrent players across leaderboard
               </p>
             </div>
-            {metrics.length > 0 && (
-              <span className="text-xs text-brand-dark/70 dark:text-brand-light/60 font-mono">
-                {metrics.length} entries loaded
-              </span>
-            )}
+
+            {/* Stat 2 */}
+            <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
+              <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
+                <span>[02] // #1_TOP_TITLE</span>
+                <span className="text-amber-500">👑 LEADER</span>
+              </div>
+              <div className="mt-2 text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                {loading ? "LOADING..." : metrics[0]?.name || "N/A"}
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500 truncate">
+                {metrics[0]
+                  ? `${Number(metrics[0].ccu).toLocaleString()} CCU | ${
+                      metrics[0].genre || "Genre: N/A"
+                    }`
+                  : "No data available"}
+              </p>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
+              <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
+                <span>[03] // TELEMETRY_STREAM</span>
+                <span className="text-cyan-500">⚡ ACTIVE</span>
+              </div>
+              <div className="mt-2 text-base font-bold text-zinc-800 dark:text-zinc-200">
+                {loading ? "QUERYING..." : `${metrics.length} TITLES TRACKED`}
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Synchronized with MotherDuck Cloud Data Warehouse
+              </p>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-brand-main/10 dark:bg-brand-dark/30 text-brand-dark dark:text-brand-light/90 text-xs font-semibold uppercase tracking-wider border-b border-brand-main/20 dark:border-brand-dark/60">
-                  <th scope="col" className="py-3.5 px-4 w-12 text-center">
-                    #
-                  </th>
-                  <th scope="col" className="py-3.5 px-4">
-                    Game Title
-                  </th>
-                  <th scope="col" className="py-3.5 px-4">
-                    Genre
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    CCU
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    Total Visits
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    Upvotes
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    Downvotes
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    Approval
-                  </th>
-                  <th scope="col" className="py-3.5 px-4 text-right">
-                    Snapshot Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-main/15 dark:divide-brand-dark/40 font-medium">
-                {loading ? (
-                  Array.from({ length: 10 }).map((_, idx) => (
-                    <tr key={idx} className="animate-pulse">
-                      <td className="py-4 px-4 text-center">
-                        <div className="h-4 w-5 bg-brand-main/20 dark:bg-brand-dark/50 rounded mx-auto" />
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="h-4 w-44 bg-brand-main/20 dark:bg-brand-dark/50 rounded" />
-                        <div className="h-3 w-20 bg-brand-main/10 dark:bg-brand-dark/30 rounded mt-1.5" />
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="h-5 w-24 bg-brand-main/20 dark:bg-brand-dark/50 rounded-full" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-16 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-20 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-14 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-14 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-12 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <div className="h-4 w-20 bg-brand-main/20 dark:bg-brand-dark/50 rounded ml-auto" />
-                      </td>
-                    </tr>
-                  ))
-                ) : metrics.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="py-12 text-center text-brand-dark/60 dark:text-brand-light/50 text-sm"
-                    >
-                      No metrics records found in MotherDuck database.
-                    </td>
+          {/* Error Alert Box */}
+          {error && (
+            <div className="border-2 border-rose-600 bg-rose-100 dark:bg-rose-950/50 p-4 text-rose-900 dark:text-rose-200 shadow-[4px_4px_0px_0px_#e11d48] flex items-center justify-between">
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-lg">❌</span>
+                <div>
+                  <div className="font-bold uppercase tracking-wider">
+                    CRITICAL_ERROR // QUERY_FAILED
+                  </div>
+                  <div className="mt-0.5 font-mono opacity-90">{error}</div>
+                </div>
+              </div>
+              <button
+                onClick={handleRefresh}
+                className="border-2 border-rose-900 dark:border-rose-400 bg-rose-200 dark:bg-rose-900 hover:bg-rose-300 px-3 py-1 text-xs font-bold uppercase shadow-[2px_2px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+              >
+                [RETRY]
+              </button>
+            </div>
+          )}
+
+          {/* Table Container (Chunky Pixel Window) */}
+          <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-white dark:bg-zinc-950 shadow-[5px_5px_0px_0px_#000] dark:shadow-[5px_5px_0px_0px_#27272a] overflow-hidden">
+            {/* Table Header Bar */}
+            <div className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase">
+              <div className="flex items-center gap-2">
+                <span>📊</span>
+                <span>LEADERBOARD // TOP_10_CONCURRENT_PLAYERS</span>
+              </div>
+              <span className="text-[11px] font-normal text-zinc-600 dark:text-zinc-400">
+                TOTAL: {metrics.length} ROWS
+              </span>
+            </div>
+
+            {/* Scrollable Data Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider">
+                    <th className="py-3 px-3 w-14 text-center border-r border-zinc-300 dark:border-zinc-800">
+                      RANK
+                    </th>
+                    <th className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800">
+                      GAME TITLE
+                    </th>
+                    <th className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800">
+                      GENRE
+                    </th>
+                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                      CCU
+                    </th>
+                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                      VISITS
+                    </th>
+                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                      UPVOTES
+                    </th>
+                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                      DOWNVOTES
+                    </th>
+                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                      APPROVAL
+                    </th>
+                    <th className="py-3 px-4 text-right">
+                      TIMESTAMP
+                    </th>
                   </tr>
-                ) : (
-                  metrics.map((game, idx) => {
-                    const up = Number(game.upvotes) || 0;
-                    const down = Number(game.downvotes) || 0;
-                    const totalVotes = up + down;
-                    const rating =
-                      totalVotes > 0 ? Math.round((up / totalVotes) * 100) : null;
-
-                    const rankBadgeColor =
-                      idx === 0
-                        ? "bg-amber-400/20 text-amber-700 dark:text-amber-400 border-amber-400/40"
-                        : idx === 1
-                        ? "bg-zinc-400/20 text-zinc-700 dark:text-zinc-300 border-zinc-400/40"
-                        : idx === 2
-                        ? "bg-amber-700/20 text-amber-800 dark:text-amber-500 border-amber-700/40"
-                        : "text-brand-dark/70 dark:text-brand-light/50 border-brand-main/20 dark:border-brand-dark/40";
-
-                    return (
+                </thead>
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800/80 font-mono">
+                  {loading ? (
+                    Array.from({ length: 10 }).map((_, idx) => (
                       <tr
-                        key={String(game.universe_id) + idx}
-                        className="hover:bg-brand-main/5 dark:hover:bg-brand-dark/30 transition-colors"
+                        key={idx}
+                        className="animate-pulse bg-zinc-50 dark:bg-zinc-950/40"
                       >
-                        {/* Rank */}
-                        <td className="py-3.5 px-4 text-center">
-                          <span
-                            className={`inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-bold border ${rankBadgeColor}`}
-                          >
-                            {idx + 1}
-                          </span>
+                        <td className="py-3.5 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-7 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
                         </td>
-
-                        {/* Game Title */}
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-brand-darkest dark:text-brand-light hover:text-brand-main dark:hover:text-brand-main transition-colors">
-                            {game.name}
-                          </div>
-                          <div className="text-[11px] text-brand-dark/60 dark:text-brand-light/50 font-mono mt-0.5">
-                            ID: {String(game.universe_id)}
-                          </div>
+                        <td className="py-3.5 px-4 border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-44 bg-zinc-300 dark:bg-zinc-800" />
                         </td>
-
-                        {/* Stylized Genre Badge using brand-main */}
-                        <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-main/15 text-brand-dark border border-brand-main/40 dark:bg-brand-main/25 dark:text-brand-light dark:border-brand-main/60 shadow-2xs whitespace-nowrap">
-                            {game.genre || "Unclassified"}
-                          </span>
+                        <td className="py-3.5 px-4 border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-28 bg-zinc-300 dark:bg-zinc-800" />
                         </td>
-
-                        {/* CCU */}
+                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        </td>
+                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-20 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        </td>
+                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        </td>
+                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        </td>
+                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        </td>
                         <td className="py-3.5 px-4 text-right">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-brand-main/20 text-brand-darkest dark:text-brand-light border border-brand-main/50">
-                            {Number(game.ccu).toLocaleString()}
-                          </span>
-                        </td>
-
-                        {/* Total Visits */}
-                        <td className="py-3.5 px-4 text-right text-brand-darkest/90 dark:text-brand-light/90 font-mono text-xs">
-                          {Number(game.visits).toLocaleString()}
-                        </td>
-
-                        {/* Upvotes */}
-                        <td className="py-3.5 px-4 text-right text-emerald-600 dark:text-emerald-400 font-mono text-xs font-semibold">
-                          👍 {up.toLocaleString()}
-                        </td>
-
-                        {/* Downvotes */}
-                        <td className="py-3.5 px-4 text-right text-rose-600 dark:text-rose-400 font-mono text-xs font-semibold">
-                          👎 {down.toLocaleString()}
-                        </td>
-
-                        {/* Approval */}
-                        <td className="py-3.5 px-4 text-right">
-                          {rating !== null ? (
-                            <span
-                              className={`text-xs font-bold ${
-                                rating >= 80
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : rating >= 60
-                                  ? "text-amber-600 dark:text-amber-400"
-                                  : "text-rose-600 dark:text-rose-400"
-                              }`}
-                            >
-                              {rating}%
-                            </span>
-                          ) : (
-                            <span className="text-xs text-brand-dark/50 dark:text-brand-light/40">
-                              N/A
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Snapshot Time */}
-                        <td className="py-3.5 px-4 text-right text-brand-dark/70 dark:text-brand-light/60 text-xs font-mono">
-                          {game.timestamp
-                            ? new Date(game.timestamp).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
-                            : "N/A"}
+                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                    ))
+                  ) : metrics.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="py-12 text-center text-zinc-500 font-mono"
+                      >
+                        [NO_RECORDS_FOUND_IN_MOTHERDUCK]
+                      </td>
+                    </tr>
+                  ) : (
+                    metrics.map((game, idx) => {
+                      const up = Number(game.upvotes) || 0;
+                      const down = Number(game.downvotes) || 0;
+                      const totalVotes = up + down;
+                      const rating =
+                        totalVotes > 0
+                          ? Math.round((up / totalVotes) * 100)
+                          : null;
+
+                      // Pixel rank tag styling
+                      const rankClass =
+                        idx === 0
+                          ? "border border-amber-600 bg-amber-200 text-amber-950 dark:bg-amber-900/60 dark:text-amber-200 dark:border-amber-500 font-black shadow-[1px_1px_0px_0px_#000]"
+                          : idx === 1
+                          ? "border border-zinc-600 bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-500 font-black shadow-[1px_1px_0px_0px_#000]"
+                          : idx === 2
+                          ? "border border-orange-600 bg-orange-200 text-orange-950 dark:bg-orange-900/60 dark:text-orange-200 dark:border-orange-500 font-black shadow-[1px_1px_0px_0px_#000]"
+                          : "text-zinc-600 dark:text-zinc-400 font-bold";
+
+                      return (
+                        <tr
+                          key={String(game.universe_id) + idx}
+                          className="hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                        >
+                          {/* Rank Badge */}
+                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800/80">
+                            <span
+                              className={`inline-block px-1.5 py-0.5 text-[11px] ${rankClass}`}
+                            >
+                              #{idx + 1}
+                            </span>
+                          </td>
+
+                          {/* Game Title */}
+                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80">
+                            <div className="font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                              {game.name}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 dark:text-zinc-500 font-mono mt-0.5">
+                              ID: {String(game.universe_id)}
+                            </div>
+                          </td>
+
+                          {/* Stylized Pixel Genre Badge */}
+                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46]">
+                              <span className="text-emerald-500">▶</span>
+                              <span>{game.genre || "UNCLASSIFIED"}</span>
+                            </span>
+                          </td>
+
+                          {/* CCU */}
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                            <span className="inline-block px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-black text-xs shadow-[2px_2px_0px_0px_#059669]">
+                              {Number(game.ccu).toLocaleString()} CCU
+                            </span>
+                          </td>
+
+                          {/* Total Visits */}
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 font-bold text-zinc-700 dark:text-zinc-300">
+                            {Number(game.visits).toLocaleString()}
+                          </td>
+
+                          {/* Upvotes */}
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 text-emerald-600 dark:text-emerald-400 font-bold">
+                            ▲ {up.toLocaleString()}
+                          </td>
+
+                          {/* Downvotes */}
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 text-rose-600 dark:text-rose-400 font-bold">
+                            ▼ {down.toLocaleString()}
+                          </td>
+
+                          {/* Approval Rating */}
+                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800/80 font-bold">
+                            {rating !== null ? (
+                              <span
+                                className={`px-1.5 py-0.5 border text-[11px] ${
+                                  rating >= 80
+                                    ? "border-emerald-600 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-300"
+                                    : rating >= 60
+                                    ? "border-amber-600 text-amber-700 bg-amber-50 dark:bg-amber-950/50 dark:text-amber-300"
+                                    : "border-rose-600 text-rose-700 bg-rose-50 dark:bg-rose-950/50 dark:text-rose-300"
+                                }`}
+                              >
+                                {rating}%
+                              </span>
+                            ) : (
+                              <span className="text-zinc-400">N/A</span>
+                            )}
+                          </td>
+
+                          {/* Snapshot Timestamp */}
+                          <td className="py-3 px-4 text-right text-zinc-500 dark:text-zinc-400 whitespace-nowrap text-[11px]">
+                            {game.timestamp
+                              ? new Date(game.timestamp).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                  }
+                                )
+                              : "N/A"}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-brand-main/20 dark:border-brand-dark/50 py-4 text-center text-xs text-brand-dark/70 dark:text-brand-light/60 transition-colors">
-        Roblox Trend Tracker • Powered by Next.js, Tailwind CSS & MotherDuck
-      </footer>
+        {/* Retro Terminal Footer */}
+        <div className="border-t-2 border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 px-4 py-2 text-center text-[11px] text-zinc-600 dark:text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-1">
+          <div>
+            <span>[SYS]</span> ROBLOX_TREND_TRACKER // MOTHERDUCK_ENGINE // NEXT.JS
+          </div>
+          <div>
+            <span>[STATUS]</span> 100% OPERATIONAL // SCAN_CYCLE: 30m
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
