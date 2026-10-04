@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
-interface GameMetric {
+export interface GameMetric {
   universe_id: string | number;
   name: string;
   description?: string;
+  created_at?: string;
   genre?: string;
   ccu: number;
+  prev_ccu?: number | null;
+  ccu_diff?: number | null;
+  ccu_pct_change?: number | null;
   visits: string | number;
   upvotes: number;
   downvotes: number;
   timestamp: string;
+  peak_ccu?: number | null;
+  ccu_history?: number[];
 }
 
 export default function Home() {
@@ -19,6 +25,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDark, setIsDark] = useState<boolean>(true);
+  const [viewMode, setViewMode] = useState<"leaderboard" | "breakout">("leaderboard");
 
   // Synchronize dark mode state with html class on mount
   useEffect(() => {
@@ -70,10 +77,36 @@ export default function Home() {
     fetchMetrics();
   }, [fetchMetrics]);
 
-  const totalCCU = metrics.reduce(
-    (acc, item) => acc + (Number(item.ccu) || 0),
-    0
-  );
+  const totalCCU = useMemo(() => {
+    return metrics.reduce((acc, item) => acc + (Number(item.ccu) || 0), 0);
+  }, [metrics]);
+
+  const topGainer = useMemo(() => {
+    const candidates = metrics.filter(
+      (m) =>
+        m.ccu_pct_change !== null &&
+        m.ccu_pct_change !== undefined &&
+        m.ccu_pct_change > 0
+    );
+    if (candidates.length === 0) return null;
+    return candidates.reduce((prev, curr) =>
+      (curr.ccu_pct_change || 0) > (prev.ccu_pct_change || 0) ? curr : prev
+    );
+  }, [metrics]);
+
+  const displayedMetrics = useMemo(() => {
+    const list = [...metrics];
+    if (viewMode === "breakout") {
+      list.sort((a, b) => {
+        const aVal = a.ccu_pct_change ?? (a.prev_ccu === null ? 9999 : -9999);
+        const bVal = b.ccu_pct_change ?? (b.prev_ccu === null ? 9999 : -9999);
+        return bVal - aVal;
+      });
+    } else {
+      list.sort((a, b) => Number(b.ccu) - Number(a.ccu));
+    }
+    return list;
+  }, [metrics, viewMode]);
 
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-mono flex flex-col transition-colors duration-150 p-3 sm:p-6 lg:p-8">
@@ -91,7 +124,7 @@ export default function Home() {
             <div className="h-4 w-[2px] bg-zinc-400 dark:bg-zinc-600 hidden sm:block" />
             <div className="text-xs font-bold tracking-tight uppercase flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
               <span>👾</span>
-              <span>ROBLOX_TRENDS_CLI v2.0</span>
+              <span>ROBLOX_TRENDS_CLI v2.2</span>
               <span className="hidden md:inline text-zinc-500 dark:text-zinc-400">
                 [SESSION: LIVE_MOTHERDUCK]
               </span>
@@ -138,7 +171,7 @@ export default function Home() {
               SYS@MOTHERDUCK:~$
             </span>
             <span className="text-zinc-800 dark:text-zinc-200">
-              run query --table games+metrics --order ccu_desc --limit 10
+              run query --table games+metrics --view {viewMode} --window 30d
             </span>
             <span className="pixel-cursor text-emerald-500 font-black">▋</span>
           </div>
@@ -147,34 +180,35 @@ export default function Home() {
             <span>[STATUS: ONLINE]</span>
             <span>[RETENTION: 30-DAY ROLLING]</span>
             <span>[CLUSTER_ENGINE: KMEANS_NLP]</span>
+            <span>[VELOCITY_DELTA: 24H_ACTIVE]</span>
           </div>
         </div>
 
         {/* Inner Content Area */}
         <div className="p-4 sm:p-6 space-y-6 flex-1">
           {/* KPI Stat Blocks (Pixel Styled) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Stat 1 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Stat 1: Total CCU */}
             <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a] relative">
               <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
-                <span>[01] // TOTAL_TOP10_CCU</span>
+                <span>[01] // TOTAL_LEADER_CCU</span>
                 <span className="text-emerald-500">● LIVE</span>
               </div>
-              <div className="mt-2 text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+              <div className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                 {loading ? "FETCHING..." : totalCCU.toLocaleString()}
               </div>
               <p className="mt-1 text-[11px] text-zinc-500">
-                Sum of active concurrent players across leaderboard
+                Sum of active concurrent players across tracked pool
               </p>
             </div>
 
-            {/* Stat 2 */}
+            {/* Stat 2: #1 Top Title */}
             <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
               <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
                 <span>[02] // #1_TOP_TITLE</span>
                 <span className="text-amber-500">👑 LEADER</span>
               </div>
-              <div className="mt-2 text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 truncate">
+              <div className="mt-2 text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
                 {loading ? (
                   "LOADING..."
                 ) : metrics[0]?.name ? (
@@ -203,17 +237,51 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Stat 3 */}
+            {/* Stat 3: Top Gainer / Rising Star */}
             <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
               <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
-                <span>[03] // TELEMETRY_STREAM</span>
+                <span>[03] // TOP_BREAKOUT</span>
+                <span className="text-purple-500">🚀 SURGE</span>
+              </div>
+              <div className="mt-2 text-base font-bold text-purple-600 dark:text-purple-400 truncate">
+                {loading ? (
+                  "COMPUTING..."
+                ) : topGainer ? (
+                  <a
+                    href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                      topGainer.name
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline truncate inline-flex items-center gap-1"
+                  >
+                    <span className="truncate">{topGainer.name}</span>
+                    <span className="text-xs">↗</span>
+                  </a>
+                ) : (
+                  "STABLE / NO SURGE"
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-500 truncate">
+                {topGainer && topGainer.ccu_pct_change !== null
+                  ? `+${topGainer.ccu_pct_change}% growth | ${Number(
+                      topGainer.ccu
+                    ).toLocaleString()} CCU`
+                  : "Tracking historical deltas"}
+              </p>
+            </div>
+
+            {/* Stat 4: Telemetry Stream */}
+            <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
+              <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
+                <span>[04] // TELEMETRY_STREAM</span>
                 <span className="text-cyan-500">⚡ ACTIVE</span>
               </div>
               <div className="mt-2 text-base font-bold text-zinc-800 dark:text-zinc-200">
                 {loading ? "QUERYING..." : `${metrics.length} TITLES TRACKED`}
               </div>
               <p className="mt-1 text-[11px] text-zinc-500">
-                Synchronized with MotherDuck Cloud Data Warehouse
+                MotherDuck Cloud Warehouse synced
               </p>
             </div>
           </div>
@@ -239,16 +307,54 @@ export default function Home() {
             </div>
           )}
 
+          {/* View Mode Switcher Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/90 p-2 shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#27272a]">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 px-2">
+                MODE:
+              </span>
+              <button
+                onClick={() => setViewMode("leaderboard")}
+                className={`px-3 py-1 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
+                  viewMode === "leaderboard"
+                    ? "border-zinc-900 bg-emerald-400 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-500"
+                    : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                }`}
+              >
+                🔥 TOP LEADERBOARD
+              </button>
+              <button
+                onClick={() => setViewMode("breakout")}
+                className={`px-3 py-1 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
+                  viewMode === "breakout"
+                    ? "border-zinc-900 bg-purple-400 text-zinc-950 dark:border-purple-400 dark:bg-purple-500"
+                    : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                }`}
+              >
+                🚀 RISING STARS (VELOCITY)
+              </button>
+            </div>
+            <div className="text-[11px] text-zinc-600 dark:text-zinc-400 px-2 font-mono">
+              {viewMode === "leaderboard"
+                ? "Sorted by Highest Active CCU"
+                : "Sorted by Highest % Player Velocity"}
+            </div>
+          </div>
+
           {/* Table Container (Chunky Pixel Window) */}
           <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-white dark:bg-zinc-950 shadow-[5px_5px_0px_0px_#000] dark:shadow-[5px_5px_0px_0px_#27272a] overflow-hidden">
             {/* Table Header Bar */}
             <div className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 px-4 py-2.5 flex items-center justify-between text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase">
               <div className="flex items-center gap-2">
-                <span>📊</span>
-                <span>LEADERBOARD // TOP_10_CONCURRENT_PLAYERS</span>
+                <span>{viewMode === "leaderboard" ? "📊" : "🚀"}</span>
+                <span>
+                  {viewMode === "leaderboard"
+                    ? "LEADERBOARD // TOP_CONCURRENT_PLAYERS"
+                    : "RISING STARS // RAPID_MOMENTUM_BREAKOUTS"}
+                </span>
               </div>
               <span className="text-[11px] font-normal text-zinc-600 dark:text-zinc-400">
-                TOTAL: {metrics.length} ROWS
+                DISPLAYING: {displayedMetrics.length} ROWS
               </span>
             </div>
 
@@ -269,6 +375,9 @@ export default function Home() {
                     <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
                       CCU
                     </th>
+                    <th className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800">
+                      24H TREND
+                    </th>
                     <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
                       VISITS
                     </th>
@@ -282,7 +391,7 @@ export default function Home() {
                       APPROVAL
                     </th>
                     <th className="py-3 px-4 text-right">
-                      TIMESTAMP
+                      SNAPSHOT
                     </th>
                   </tr>
                 </thead>
@@ -305,6 +414,9 @@ export default function Home() {
                         <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
                           <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
+                        <td className="py-3.5 px-4 text-center border-r border-zinc-200 dark:border-zinc-800">
+                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                        </td>
                         <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
                           <div className="h-4 w-20 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
@@ -322,17 +434,17 @@ export default function Home() {
                         </td>
                       </tr>
                     ))
-                  ) : metrics.length === 0 ? (
+                  ) : displayedMetrics.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={9}
+                        colSpan={10}
                         className="py-12 text-center text-zinc-500 font-mono"
                       >
                         [NO_RECORDS_FOUND_IN_MOTHERDUCK]
                       </td>
                     </tr>
                   ) : (
-                    metrics.map((game, idx) => {
+                    displayedMetrics.map((game, idx) => {
                       const up = Number(game.upvotes) || 0;
                       const down = Number(game.downvotes) || 0;
                       const totalVotes = up + down;
@@ -350,6 +462,8 @@ export default function Home() {
                           : idx === 2
                           ? "border border-orange-600 bg-orange-200 text-orange-950 dark:bg-orange-900/60 dark:text-orange-200 dark:border-orange-500 font-black shadow-[1px_1px_0px_0px_#000]"
                           : "text-zinc-600 dark:text-zinc-400 font-bold";
+
+                      const pct = game.ccu_pct_change;
 
                       return (
                         <tr
@@ -412,6 +526,29 @@ export default function Home() {
                             <span className="inline-block px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-black text-xs shadow-[2px_2px_0px_0px_#059669]">
                               {Number(game.ccu).toLocaleString()} CCU
                             </span>
+                          </td>
+
+                          {/* 24H Trend Velocity Badge */}
+                          <td className="py-3 px-4 text-center border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
+                            {pct === null || pct === undefined ? (
+                              <span className="inline-flex items-center px-2 py-0.5 border border-cyan-600 dark:border-cyan-500 bg-cyan-100 text-cyan-950 dark:bg-cyan-950/80 dark:text-cyan-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#0891b2]">
+                                ★ NEW
+                              </span>
+                            ) : pct > 0 ? (
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#059669]">
+                                <span>+{pct}%</span>
+                                <span>▲</span>
+                              </span>
+                            ) : pct < 0 ? (
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 border border-rose-600 dark:border-rose-500 bg-rose-100 text-rose-950 dark:bg-rose-950/80 dark:text-rose-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#e11d48]">
+                                <span>{pct}%</span>
+                                <span>▼</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 border border-zinc-400 dark:border-zinc-700 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 font-bold text-[11px]">
+                                0.0% ━
+                              </span>
+                            )}
                           </td>
 
                           {/* Total Visits */}

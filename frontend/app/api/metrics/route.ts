@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { DuckDBInstance } from "@duckdb/node-api";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const token = process.env.MOTHERDUCK_TOKEN;
     if (!token) {
@@ -13,13 +13,17 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200) : 100;
+
     const instance = await DuckDBInstance.create(
       `md:roblox_trends?motherduck_token=${process.env.MOTHERDUCK_TOKEN}`
     );
     const connection = await instance.connect();
 
     const query = `
-      WITH latest_metrics AS (
+      WITH ranked_metrics AS (
         SELECT 
           universe_id,
           timestamp,
@@ -29,22 +33,47 @@ export async function GET() {
           downvotes,
           ROW_NUMBER() OVER (PARTITION BY universe_id ORDER BY timestamp DESC) AS rn
         FROM metrics
+      ),
+      latest AS (
+        SELECT * FROM ranked_metrics WHERE rn = 1
+      ),
+      previous AS (
+        SELECT universe_id, ccu AS prev_ccu FROM ranked_metrics WHERE rn = 2
+      ),
+      history AS (
+        SELECT 
+          universe_id,
+          LIST(ccu ORDER BY timestamp ASC) AS ccu_history,
+          MAX(ccu) AS peak_ccu
+        FROM (
+          SELECT universe_id, timestamp, ccu
+          FROM ranked_metrics
+          WHERE rn <= 10
+        )
+        GROUP BY universe_id
       )
       SELECT 
         g.universe_id,
         g.name,
         g.description,
+        g.created_at,
         COALESCE(g.cluster_label, 'Unclassified') AS genre,
         m.ccu,
+        p.prev_ccu,
+        (m.ccu - COALESCE(p.prev_ccu, m.ccu)) AS ccu_diff,
+        ROUND(((m.ccu - COALESCE(p.prev_ccu, m.ccu)) * 100.0) / NULLIF(p.prev_ccu, 0), 1) AS ccu_pct_change,
         m.visits,
         m.upvotes,
         m.downvotes,
-        m.timestamp
-      FROM latest_metrics m
+        m.timestamp,
+        h.peak_ccu,
+        h.ccu_history
+      FROM latest m
+      LEFT JOIN previous p ON m.universe_id = p.universe_id
+      LEFT JOIN history h ON m.universe_id = h.universe_id
       LEFT JOIN games g ON m.universe_id = g.universe_id
-      WHERE m.rn = 1
       ORDER BY m.ccu DESC
-      LIMIT 10;
+      LIMIT ${limit};
     `;
 
     const reader = await connection.runAndReadAll(query);
