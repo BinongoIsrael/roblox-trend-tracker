@@ -9,6 +9,7 @@ import aiohttp
 from dotenv import load_dotenv
 import duckdb
 
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 load_dotenv('../.env')
 load_dotenv()
 
@@ -188,6 +189,12 @@ async def run_scraper(db_path: Optional[Any] = None) -> None:
             len(fetched_games),
         )
         snapshot_time = datetime.now(timezone.utc)
+
+        token = os.environ.get("MOTHERDUCK_TOKEN")
+        if not token:
+            raise ValueError(
+                "MOTHERDUCK_TOKEN is not set. Please ensure MOTHERDUCK_TOKEN is set in your .env file or environment variables."
+            )
 
         with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
             games_inserted = 0

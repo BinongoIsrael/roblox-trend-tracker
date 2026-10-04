@@ -8,6 +8,7 @@ from typing import Any, Optional
 from dotenv import load_dotenv
 import duckdb
 
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 load_dotenv('../.env')
 load_dotenv()
 import numpy as np

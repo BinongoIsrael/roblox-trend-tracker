@@ -6,6 +6,7 @@ from typing import Any, Optional
 from dotenv import load_dotenv
 import duckdb
 
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 load_dotenv('../.env')
 load_dotenv()
 
@@ -15,6 +16,11 @@ DB_PATH = Path(__file__).resolve().parent / "roblox_trends.duckdb"
 def init_database(db_path: Optional[Any] = None) -> None:
     """Creates the tables and constraints in the DuckDB database."""
     print("Connecting to database: roblox_trends...")
+    token = os.environ.get("MOTHERDUCK_TOKEN")
+    if not token:
+        raise ValueError(
+            "MOTHERDUCK_TOKEN is not set. Please ensure MOTHERDUCK_TOKEN is set in your .env file or environment variables."
+        )
     with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         # Create games table
         con.execute(
