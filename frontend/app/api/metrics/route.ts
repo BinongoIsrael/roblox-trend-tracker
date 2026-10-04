@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DuckDBInstance } from "@duckdb/node-api";
+import { Pool } from "pg";
 
 export const dynamic = "force-dynamic";
+
+let pool: Pool | null = null;
+
+function getPool(): Pool {
+  if (!pool) {
+    const token = process.env.MOTHERDUCK_TOKEN;
+    if (!token) {
+      throw new Error("MOTHERDUCK_TOKEN environment variable is not set.");
+    }
+
+    pool = new Pool({
+      host: process.env.MOTHERDUCK_HOST || "pg.ap-northeast-1-aws.motherduck.com",
+      port: 5432,
+      user: "postgres",
+      password: token,
+      database: "roblox_trends",
+      ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
+  }
+  return pool;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,12 +39,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get("limit");
-    const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200) : 100;
-
-    const instance = await DuckDBInstance.create(
-      `md:roblox_trends?motherduck_token=${process.env.MOTHERDUCK_TOKEN}`
-    );
-    const connection = await instance.connect();
+    const limit = limitParam
+      ? Math.min(Math.max(parseInt(limitParam, 10) || 50, 1), 200)
+      : 100;
 
     const query = `
       WITH ranked_metrics AS (
@@ -76,10 +97,10 @@ export async function GET(request: NextRequest) {
       LIMIT ${limit};
     `;
 
-    const reader = await connection.runAndReadAll(query);
-    const rows = reader.getRowObjectsJson();
+    const clientPool = getPool();
+    const result = await clientPool.query(query);
 
-    return NextResponse.json(rows);
+    return NextResponse.json(result.rows);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal server error";
     console.error("Failed to query MotherDuck:", error);
