@@ -175,7 +175,24 @@ export default function Home() {
                 <span className="text-amber-500">👑 LEADER</span>
               </div>
               <div className="mt-2 text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 truncate">
-                {loading ? "LOADING..." : metrics[0]?.name || "N/A"}
+                {loading ? (
+                  "LOADING..."
+                ) : metrics[0]?.name ? (
+                  <a
+                    href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                      metrics[0].name
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`View ${metrics[0].name} on Roblox`}
+                    className="hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline inline-flex items-center gap-1 truncate"
+                  >
+                    <span className="truncate">{metrics[0].name}</span>
+                    <span className="text-xs text-zinc-400">↗</span>
+                  </a>
+                ) : (
+                  "N/A"
+                )}
               </div>
               <p className="mt-1 text-[11px] text-zinc-500 truncate">
                 {metrics[0]
@@ -348,13 +365,37 @@ export default function Home() {
                             </span>
                           </td>
 
-                          {/* Game Title */}
+                          {/* Game Title with Direct Roblox Link */}
                           <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80">
-                            <div className="font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                              {game.name}
-                            </div>
-                            <div className="text-[10px] text-zinc-500 dark:text-zinc-500 font-mono mt-0.5">
-                              ID: {String(game.universe_id)}
+                            <a
+                              href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                                game.name
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`Play ${game.name} on Roblox`}
+                              className="group inline-flex items-center gap-1 font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                            >
+                              <span className="group-hover:underline underline-offset-2">
+                                {game.name}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 inline-block">
+                                ↗
+                              </span>
+                            </a>
+                            <div className="text-[10px] text-zinc-500 dark:text-zinc-500 font-mono mt-0.5 flex items-center gap-2">
+                              <span>ID: {String(game.universe_id)}</span>
+                              <span>•</span>
+                              <a
+                                href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                                  game.name
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+                              >
+                                [PLAY ↗]
+                              </a>
                             </div>
                           </td>
 
