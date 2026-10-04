@@ -20,6 +20,73 @@ export interface GameMetric {
   ccu_history?: number[];
 }
 
+function Sparkline({
+  data,
+  isUp,
+}: {
+  data?: number[];
+  isUp?: boolean | null;
+}) {
+  if (!data || data.length < 2) {
+    return (
+      <span className="text-[10px] text-zinc-400 font-mono select-none px-1">
+        [─]
+      </span>
+    );
+  }
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const width = 58;
+  const height = 18;
+  const padding = 2;
+
+  const points = data
+    .map((val, idx) => {
+      const x = padding + (idx / (data.length - 1)) * (width - 2 * padding);
+      const y =
+        height - padding - ((val - min) / range) * (height - 2 * padding);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  const lastVal = data[data.length - 1];
+  const lastX = width - padding;
+  const lastY =
+    height - padding - ((lastVal - min) / range) * (height - 2 * padding);
+
+  const strokeColor =
+    isUp === true
+      ? "#10b981"
+      : isUp === false
+      ? "#f43f5e"
+      : "#71717a";
+
+  return (
+    <span
+      className="inline-block"
+      title={`CCU History: ${data.map((d) => d.toLocaleString()).join(" → ")}`}
+    >
+      <svg
+        width={width}
+        height={height}
+        className="inline-block overflow-visible"
+      >
+        <polyline
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          points={points}
+        />
+        <circle cx={lastX} cy={lastY} r="2" fill={strokeColor} />
+      </svg>
+    </span>
+  );
+}
+
 export default function Home() {
   const [metrics, setMetrics] = useState<GameMetric[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,6 +100,7 @@ export default function Home() {
   const [rowLimit, setRowLimit] = useState<number | "ALL">(10);
   const [sortColumn, setSortColumn] = useState<string>("ccu");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [showMarketShare, setShowMarketShare] = useState<boolean>(true);
 
   // Synchronize dark mode state with html class on mount
   useEffect(() => {
@@ -107,6 +175,23 @@ export default function Home() {
       if (m.genre) set.add(m.genre);
     });
     return ["ALL", ...Array.from(set).sort()];
+  }, [metrics]);
+
+  // Genre Market Share calculation
+  const genreMarketShare = useMemo(() => {
+    const map: Record<string, number> = {};
+    metrics.forEach((m) => {
+      const g = m.genre || "Unclassified";
+      map[g] = (map[g] || 0) + (Number(m.ccu) || 0);
+    });
+    const total = Object.values(map).reduce((a, b) => a + b, 0) || 1;
+    return Object.entries(map)
+      .map(([genre, ccu]) => ({
+        genre,
+        ccu,
+        pct: Math.round((ccu / total) * 1000) / 10,
+      }))
+      .sort((a, b) => b.ccu - a.ccu);
   }, [metrics]);
 
   const handleModeChange = (mode: "leaderboard" | "breakout") => {
@@ -225,7 +310,7 @@ export default function Home() {
             <div className="h-4 w-[2px] bg-zinc-400 dark:bg-zinc-600 hidden sm:block" />
             <div className="text-xs font-bold tracking-tight uppercase flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
               <span>👾</span>
-              <span>ROBLOX_TRENDS_CLI v2.3</span>
+              <span>ROBLOX_TRENDS_CLI v2.4</span>
               <span className="hidden md:inline text-zinc-500 dark:text-zinc-400">
                 [SESSION: LIVE_MOTHERDUCK]
               </span>
@@ -281,7 +366,7 @@ export default function Home() {
             <span>[STATUS: ONLINE]</span>
             <span>[TOTAL_POOL: {metrics.length} GAMES]</span>
             <span>[CLUSTER_ENGINE: KMEANS_NLP]</span>
-            <span>[SORT_COL: {sortColumn.toUpperCase()}_{sortDirection.toUpperCase()}]</span>
+            <span>[SPARKLINE_TELEMETRY: ACTIVE]</span>
           </div>
         </div>
 
@@ -385,6 +470,67 @@ export default function Home() {
                 MotherDuck Cloud Warehouse synced
               </p>
             </div>
+          </div>
+
+          {/* Genre Market Share Visualizer Card */}
+          <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/90 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase text-zinc-800 dark:text-zinc-200">
+                <span>📊</span>
+                <span>GENRE_MARKET_SHARE // CONCURRENT_PLAYER_DISTRIBUTION</span>
+              </div>
+              <button
+                onClick={() => setShowMarketShare(!showMarketShare)}
+                className="text-[11px] font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 uppercase"
+              >
+                {showMarketShare ? "[COLLAPSE -]" : "[EXPAND +]"}
+              </button>
+            </div>
+
+            {showMarketShare && (
+              <div className="space-y-2.5">
+                {genreMarketShare.map((item) => {
+                  const isSelected = selectedGenre === item.genre;
+                  return (
+                    <div
+                      key={item.genre}
+                      onClick={() =>
+                        setSelectedGenre(isSelected ? "ALL" : item.genre)
+                      }
+                      title={`Click to filter by ${item.genre}`}
+                      className="group cursor-pointer select-none"
+                    >
+                      <div className="flex items-center justify-between text-xs font-mono mb-1">
+                        <span
+                          className={`font-bold flex items-center gap-1.5 ${
+                            isSelected
+                              ? "text-emerald-600 dark:text-emerald-400 underline"
+                              : "text-zinc-700 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+                          }`}
+                        >
+                          <span>▶</span>
+                          <span>{item.genre}</span>
+                        </span>
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
+                          {item.ccu.toLocaleString()} CCU ({item.pct}%)
+                        </span>
+                      </div>
+                      {/* Pixel Progress Bar */}
+                      <div className="h-3 border border-zinc-900 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 overflow-hidden relative shadow-[1px_1px_0px_0px_#000] dark:shadow-[1px_1px_0px_0px_#3f3f46]">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            isSelected
+                              ? "bg-emerald-500"
+                              : "bg-emerald-600 dark:bg-emerald-500 group-hover:bg-emerald-400"
+                          }`}
+                          style={{ width: `${Math.max(item.pct, 1.5)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Error Alert Box */}
@@ -567,7 +713,7 @@ export default function Home() {
                       className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
                     >
                       <div className="flex items-center justify-center">
-                        <span>24H TREND</span>
+                        <span>TREND & TRAJECTORY</span>
                         {renderSortIndicator("trend")}
                       </div>
                     </th>
@@ -620,7 +766,7 @@ export default function Home() {
                           <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
                         </td>
                         <td className="py-3.5 px-4 text-center border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                          <div className="h-4 w-24 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
                         </td>
                         <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
                           <div className="h-4 w-20 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
@@ -737,27 +883,41 @@ export default function Home() {
                             </span>
                           </td>
 
-                          {/* 24H Trend Velocity Badge */}
+                          {/* Trend & Trajectory Sparkline */}
                           <td className="py-3 px-4 text-center border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
-                            {pct === null || pct === undefined ? (
-                              <span className="inline-flex items-center px-2 py-0.5 border border-cyan-600 dark:border-cyan-500 bg-cyan-100 text-cyan-950 dark:bg-cyan-950/80 dark:text-cyan-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#0891b2]">
-                                ★ NEW
-                              </span>
-                            ) : pct > 0 ? (
-                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#059669]">
-                                <span>+{pct}%</span>
-                                <span>▲</span>
-                              </span>
-                            ) : pct < 0 ? (
-                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 border border-rose-600 dark:border-rose-500 bg-rose-100 text-rose-950 dark:bg-rose-950/80 dark:text-rose-300 font-bold text-[11px] shadow-[1px_1px_0px_0px_#e11d48]">
-                                <span>{pct}%</span>
-                                <span>▼</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2 py-0.5 border border-zinc-400 dark:border-zinc-700 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 font-bold text-[11px]">
-                                0.0% ━
-                              </span>
-                            )}
+                            <div className="flex items-center justify-center gap-2">
+                              <Sparkline
+                                data={game.ccu_history}
+                                isUp={
+                                  pct === null || pct === undefined
+                                    ? null
+                                    : pct > 0
+                                    ? true
+                                    : pct < 0
+                                    ? false
+                                    : null
+                                }
+                              />
+                              {pct === null || pct === undefined ? (
+                                <span className="inline-flex items-center px-1.5 py-0.5 border border-cyan-600 dark:border-cyan-500 bg-cyan-100 text-cyan-950 dark:bg-cyan-950/80 dark:text-cyan-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#0891b2]">
+                                  ★ NEW
+                                </span>
+                              ) : pct > 0 ? (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#059669]">
+                                  <span>+{pct}%</span>
+                                  <span>▲</span>
+                                </span>
+                              ) : pct < 0 ? (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 border border-rose-600 dark:border-rose-500 bg-rose-100 text-rose-950 dark:bg-rose-950/80 dark:text-rose-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#e11d48]">
+                                  <span>{pct}%</span>
+                                  <span>▼</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-1.5 py-0.5 border border-zinc-400 dark:border-zinc-700 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 font-bold text-[10px]">
+                                  0.0% ━
+                                </span>
+                              )}
+                            </div>
                           </td>
 
                           {/* Total Visits */}
