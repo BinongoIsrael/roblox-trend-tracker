@@ -3,3 +3,7 @@
 __pycache__/
 .vscode/
 .env
+frontend/.env
+frontend/.env.local
+node_modules/
+.next/
