@@ -2,6 +2,7 @@
 
 import argparse
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import re
 import sys
@@ -32,13 +33,8 @@ class ClusterSummary:
     top_games: List[Tuple[int, str, int]]  # (universe_id, name, ccu)
 
 
-def load_data_from_duckdb(db_path: Path) -> pd.DataFrame:
+def load_data_from_duckdb(db_path: Optional[Any] = None) -> pd.DataFrame:
     """Loads games and their latest CCU snapshot from DuckDB into a DataFrame."""
-    if not db_path.exists():
-        raise FileNotFoundError(
-            f"Database file '{db_path}' not found. Please run init_db.py and scraper.py first."
-        )
-
     query = """
         SELECT 
             g.universe_id,
@@ -49,7 +45,7 @@ def load_data_from_duckdb(db_path: Path) -> pd.DataFrame:
         LEFT JOIN metrics m ON g.universe_id = m.universe_id
         GROUP BY g.universe_id, g.name, g.description;
     """
-    with duckdb.connect(str(db_path), read_only=True) as con:
+    with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         df = con.execute(query).df()
 
     return df
@@ -214,7 +210,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Step 1: Load Data
-    print(f"Loading game records from DuckDB: {args.db.name}...")
+    print("Loading game records from DuckDB: roblox_trends...")
     df = load_data_from_duckdb(args.db)
     if df.empty:
         print("No games found in the database. Please run scraper.py first.")

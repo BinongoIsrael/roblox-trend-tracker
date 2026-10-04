@@ -1,9 +1,10 @@
 """Schema migration and K-Means sub-genre label update for Roblox games in DuckDB."""
 
+import os
 from pathlib import Path
 import re
 import sys
-from typing import Any
+from typing import Any, Optional
 import duckdb
 import numpy as np
 import pandas as pd
@@ -35,13 +36,10 @@ def preprocess_text(name: Any, description: Any) -> str:
     return " ".join(tokens)
 
 
-def update_database_schema_and_clusters(db_path: Path = DB_PATH) -> None:
+def update_database_schema_and_clusters(db_path: Optional[Any] = None) -> None:
     """Adds cluster_label column to games table and populates it via K-Means clustering."""
-    if not db_path.exists():
-        raise FileNotFoundError(f"Database '{db_path.name}' does not exist.")
-
-    print(f"Connecting to database: {db_path.name}...")
-    with duckdb.connect(str(db_path)) as con:
+    print("Connecting to database: roblox_trends...")
+    with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         # Step 1: Add cluster_label column if it doesn't already exist
         print("Checking/adding 'cluster_label' column in 'games' table...")
         con.execute("ALTER TABLE games ADD COLUMN IF NOT EXISTS cluster_label VARCHAR;")

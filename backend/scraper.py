@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timezone
 import logging
+import os
 from pathlib import Path
 import sys
 from typing import Any, Dict, List, Optional
@@ -101,9 +102,9 @@ class RobloxClient:
         return None
 
 
-async def run_scraper(db_path: Path = DB_PATH) -> None:
+async def run_scraper(db_path: Optional[Any] = None) -> None:
     """Executes the data scraping and ingestion workflow."""
-    logger.info("Starting ingestion scraper. Target database: %s", db_path.name)
+    logger.info("Starting ingestion scraper. Target database: roblox_trends")
 
     async with aiohttp.ClientSession(headers=HEADERS) as session:
         client = RobloxClient(session)
@@ -179,13 +180,12 @@ async def run_scraper(db_path: Path = DB_PATH) -> None:
 
         # Step 4: Ingest into DuckDB
         logger.info(
-            "Ingesting %d game records into DuckDB (%s)...",
+            "Ingesting %d game records into DuckDB (roblox_trends)...",
             len(fetched_games),
-            db_path.name,
         )
         snapshot_time = datetime.now(timezone.utc)
 
-        with duckdb.connect(str(db_path)) as con:
+        with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
             games_inserted = 0
             metrics_inserted = 0
 
@@ -247,6 +247,15 @@ async def run_scraper(db_path: Path = DB_PATH) -> None:
                 )
                 metrics_inserted += 1
 
+            # Step 5: Rolling retention window - delete records older than 30 days
+            logger.info("Enforcing 30-day rolling retention window on metrics table...")
+            con.execute(
+                """
+                DELETE FROM metrics
+                WHERE timestamp < CURRENT_TIMESTAMP - INTERVAL 30 DAY;
+                """
+            )
+
         logger.info(
             "Ingestion complete. Processed %d games and %d metrics snapshots.",
             games_inserted,
@@ -254,10 +263,10 @@ async def run_scraper(db_path: Path = DB_PATH) -> None:
         )
 
 
-def verify_database(db_path: Path = DB_PATH) -> None:
+def verify_database(db_path: Optional[Any] = None) -> None:
     """Queries and displays summary statistics to verify table population."""
     print("\n================== Ingestion Verification ==================")
-    with duckdb.connect(str(db_path), read_only=True) as con:
+    with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         total_games = con.execute("SELECT COUNT(*) FROM games;").fetchone()[0]
         total_metrics = con.execute("SELECT COUNT(*) FROM metrics;").fetchone()[0]
         print(f"Total rows in 'games' table:   {total_games}")

@@ -1,15 +1,17 @@
 """Initialize and verify DuckDB schema for the Roblox trend tracker pipeline."""
 
+import os
 from pathlib import Path
+from typing import Any, Optional
 import duckdb
 
 DB_PATH = Path(__file__).resolve().parent / "roblox_trends.duckdb"
 
 
-def init_database(db_path: Path = DB_PATH) -> None:
+def init_database(db_path: Optional[Any] = None) -> None:
     """Creates the tables and constraints in the DuckDB database."""
-    print(f"Connecting to database: {db_path.name}...")
-    with duckdb.connect(str(db_path)) as con:
+    print("Connecting to database: roblox_trends...")
+    with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         # Create games table
         con.execute(
             """
@@ -40,10 +42,10 @@ def init_database(db_path: Path = DB_PATH) -> None:
     print("Database tables created successfully.")
 
 
-def verify_schema(db_path: Path = DB_PATH) -> None:
+def verify_schema(db_path: Optional[Any] = None) -> None:
     """Verifies and displays table schemas and constraints from DuckDB."""
     print("\n--- Verifying Schema ---")
-    with duckdb.connect(str(db_path), read_only=True) as con:
+    with duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_TOKEN')}") as con:
         tables = [row[0] for row in con.execute("SHOW TABLES;").fetchall()]
         print(f"Existing tables: {tables}")
 
