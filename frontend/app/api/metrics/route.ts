@@ -34,13 +34,14 @@ export async function GET() {
         g.universe_id,
         g.name,
         g.description,
+        COALESCE(g.cluster_label, 'Unclassified') AS genre,
         m.ccu,
         m.visits,
         m.upvotes,
         m.downvotes,
         m.timestamp
       FROM latest_metrics m
-      JOIN games g ON m.universe_id = g.universe_id
+      LEFT JOIN games g ON m.universe_id = g.universe_id
       WHERE m.rn = 1
       ORDER BY m.ccu DESC
       LIMIT 10;
