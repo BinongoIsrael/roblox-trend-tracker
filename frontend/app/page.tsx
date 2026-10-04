@@ -27,6 +27,13 @@ export default function Home() {
   const [isDark, setIsDark] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<"leaderboard" | "breakout">("leaderboard");
 
+  // Usability & filter states
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedGenre, setSelectedGenre] = useState<string>("ALL");
+  const [rowLimit, setRowLimit] = useState<number | "ALL">(10);
+  const [sortColumn, setSortColumn] = useState<string>("ccu");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
   // Synchronize dark mode state with html class on mount
   useEffect(() => {
     const root = document.documentElement;
@@ -47,7 +54,7 @@ export default function Home() {
 
   const fetchMetrics = useCallback(async () => {
     try {
-      const response = await fetch("/api/metrics");
+      const response = await fetch("/api/metrics?limit=100");
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
@@ -94,19 +101,113 @@ export default function Home() {
     );
   }, [metrics]);
 
-  const displayedMetrics = useMemo(() => {
-    const list = [...metrics];
-    if (viewMode === "breakout") {
-      list.sort((a, b) => {
-        const aVal = a.ccu_pct_change ?? (a.prev_ccu === null ? 9999 : -9999);
-        const bVal = b.ccu_pct_change ?? (b.prev_ccu === null ? 9999 : -9999);
-        return bVal - aVal;
-      });
+  const availableGenres = useMemo(() => {
+    const set = new Set<string>();
+    metrics.forEach((m) => {
+      if (m.genre) set.add(m.genre);
+    });
+    return ["ALL", ...Array.from(set).sort()];
+  }, [metrics]);
+
+  const handleModeChange = (mode: "leaderboard" | "breakout") => {
+    setViewMode(mode);
+    if (mode === "breakout") {
+      setSortColumn("trend");
+      setSortDirection("desc");
     } else {
-      list.sort((a, b) => Number(b.ccu) - Number(a.ccu));
+      setSortColumn("ccu");
+      setSortDirection("desc");
     }
+  };
+
+  const handleSort = (col: string) => {
+    if (sortColumn === col) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(col);
+      setSortDirection("desc");
+    }
+  };
+
+  const renderSortIndicator = (col: string) => {
+    if (sortColumn !== col) {
+      return <span className="opacity-30 ml-1 select-none">⇅</span>;
+    }
+    return (
+      <span className="text-emerald-500 dark:text-emerald-400 ml-1 font-bold select-none">
+        {sortDirection === "asc" ? "▲" : "▼"}
+      </span>
+    );
+  };
+
+  const processedMetrics = useMemo(() => {
+    let list = [...metrics];
+
+    // Search query filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          (m.genre && m.genre.toLowerCase().includes(q)) ||
+          String(m.universe_id).includes(q)
+      );
+    }
+
+    // Genre filter
+    if (selectedGenre !== "ALL") {
+      list = list.filter((m) => m.genre === selectedGenre);
+    }
+
+    // Sorting
+    list.sort((a, b) => {
+      let comparison = 0;
+      switch (sortColumn) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "genre":
+          comparison = (a.genre || "").localeCompare(b.genre || "");
+          break;
+        case "trend": {
+          const aVal = a.ccu_pct_change ?? (a.prev_ccu === null ? 9999 : -9999);
+          const bVal = b.ccu_pct_change ?? (b.prev_ccu === null ? 9999 : -9999);
+          comparison = aVal - bVal;
+          break;
+        }
+        case "visits":
+          comparison = Number(a.visits || 0) - Number(b.visits || 0);
+          break;
+        case "approval": {
+          const aTot = (Number(a.upvotes) || 0) + (Number(a.downvotes) || 0);
+          const bTot = (Number(b.upvotes) || 0) + (Number(b.downvotes) || 0);
+          const aRate = aTot > 0 ? (Number(a.upvotes) || 0) / aTot : -1;
+          const bRate = bTot > 0 ? (Number(b.upvotes) || 0) / bTot : -1;
+          comparison = aRate - bRate;
+          break;
+        }
+        case "ccu":
+        default:
+          comparison = Number(a.ccu || 0) - Number(b.ccu || 0);
+          break;
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+    // Row limit
+    if (rowLimit !== "ALL") {
+      list = list.slice(0, rowLimit);
+    }
+
     return list;
-  }, [metrics, viewMode]);
+  }, [
+    metrics,
+    searchQuery,
+    selectedGenre,
+    sortColumn,
+    sortDirection,
+    rowLimit,
+  ]);
 
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-mono flex flex-col transition-colors duration-150 p-3 sm:p-6 lg:p-8">
@@ -124,7 +225,7 @@ export default function Home() {
             <div className="h-4 w-[2px] bg-zinc-400 dark:bg-zinc-600 hidden sm:block" />
             <div className="text-xs font-bold tracking-tight uppercase flex items-center gap-1.5 text-zinc-800 dark:text-zinc-200">
               <span>👾</span>
-              <span>ROBLOX_TRENDS_CLI v2.2</span>
+              <span>ROBLOX_TRENDS_CLI v2.3</span>
               <span className="hidden md:inline text-zinc-500 dark:text-zinc-400">
                 [SESSION: LIVE_MOTHERDUCK]
               </span>
@@ -171,16 +272,16 @@ export default function Home() {
               SYS@MOTHERDUCK:~$
             </span>
             <span className="text-zinc-800 dark:text-zinc-200">
-              run query --table games+metrics --view {viewMode} --window 30d
+              run query --table games+metrics --view {viewMode} --genre {selectedGenre} --limit {rowLimit}
             </span>
             <span className="pixel-cursor text-emerald-500 font-black">▋</span>
           </div>
           <div className="text-[11px] text-zinc-500 dark:text-zinc-400 flex flex-wrap gap-4 pt-1">
             <span>[DB: md:roblox_trends]</span>
             <span>[STATUS: ONLINE]</span>
-            <span>[RETENTION: 30-DAY ROLLING]</span>
+            <span>[TOTAL_POOL: {metrics.length} GAMES]</span>
             <span>[CLUSTER_ENGINE: KMEANS_NLP]</span>
-            <span>[VELOCITY_DELTA: 24H_ACTIVE]</span>
+            <span>[SORT_COL: {sortColumn.toUpperCase()}_{sortDirection.toUpperCase()}]</span>
           </div>
         </div>
 
@@ -191,14 +292,14 @@ export default function Home() {
             {/* Stat 1: Total CCU */}
             <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/80 p-4 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a] relative">
               <div className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center justify-between">
-                <span>[01] // TOTAL_LEADER_CCU</span>
+                <span>[01] // TOTAL_POOL_CCU</span>
                 <span className="text-emerald-500">● LIVE</span>
               </div>
               <div className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                 {loading ? "FETCHING..." : totalCCU.toLocaleString()}
               </div>
               <p className="mt-1 text-[11px] text-zinc-500">
-                Sum of active concurrent players across tracked pool
+                Sum of active players across all tracked games
               </p>
             </div>
 
@@ -307,37 +408,100 @@ export default function Home() {
             </div>
           )}
 
-          {/* View Mode Switcher Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/90 p-2 shadow-[3px_3px_0px_0px_#000] dark:shadow-[3px_3px_0px_0px_#27272a]">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400 px-2">
-                MODE:
-              </span>
-              <button
-                onClick={() => setViewMode("leaderboard")}
-                className={`px-3 py-1 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
-                  viewMode === "leaderboard"
-                    ? "border-zinc-900 bg-emerald-400 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-500"
-                    : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                }`}
-              >
-                🔥 TOP LEADERBOARD
-              </button>
-              <button
-                onClick={() => setViewMode("breakout")}
-                className={`px-3 py-1 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
-                  viewMode === "breakout"
-                    ? "border-zinc-900 bg-purple-400 text-zinc-950 dark:border-purple-400 dark:bg-purple-500"
-                    : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                }`}
-              >
-                🚀 RISING STARS (VELOCITY)
-              </button>
+          {/* Interactive Filter & Controls Console */}
+          <div className="border-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800/90 p-3 sm:p-4 space-y-3 shadow-[4px_4px_0px_0px_#000] dark:shadow-[4px_4px_0px_0px_#27272a]">
+            {/* Row 1: Search & Mode Switcher */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              {/* Terminal Search Input */}
+              <div className="relative flex-1">
+                <div className="flex items-center border-2 border-zinc-900 dark:border-zinc-600 bg-white dark:bg-zinc-950 px-3 py-1.5 shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46]">
+                  <span className="text-emerald-500 font-bold mr-2 text-xs select-none">
+                    &gt;
+                  </span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="SEARCH GAME TITLE, GENRE, OR ID..."
+                    className="w-full bg-transparent text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none font-mono"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 font-bold uppercase ml-2"
+                    >
+                      [CLEAR]
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* View Mode Tabs */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleModeChange("leaderboard")}
+                  className={`px-3 py-1.5 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
+                    viewMode === "leaderboard"
+                      ? "border-zinc-900 bg-emerald-400 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-500"
+                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  🔥 LEADERBOARD
+                </button>
+                <button
+                  onClick={() => handleModeChange("breakout")}
+                  className={`px-3 py-1.5 text-xs font-bold uppercase border-2 transition-all shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] ${
+                    viewMode === "breakout"
+                      ? "border-zinc-900 bg-purple-400 text-zinc-950 dark:border-purple-400 dark:bg-purple-500"
+                      : "border-zinc-400 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                  }`}
+                >
+                  🚀 RISING STARS
+                </button>
+              </div>
             </div>
-            <div className="text-[11px] text-zinc-600 dark:text-zinc-400 px-2 font-mono">
-              {viewMode === "leaderboard"
-                ? "Sorted by Highest Active CCU"
-                : "Sorted by Highest % Player Velocity"}
+
+            {/* Row 2: Genre Filters & Limit Selector */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-zinc-200 dark:border-zinc-700/80">
+              {/* Genre Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
+                <span className="font-bold uppercase text-[11px] text-zinc-500 dark:text-zinc-400 mr-1 select-none">
+                  GENRE:
+                </span>
+                {availableGenres.map((genre) => (
+                  <button
+                    key={genre}
+                    onClick={() => setSelectedGenre(genre)}
+                    className={`whitespace-nowrap px-2 py-0.5 text-[11px] font-bold border uppercase transition-all ${
+                      selectedGenre === genre
+                        ? "border-emerald-600 bg-emerald-500 text-zinc-950 dark:border-emerald-400 dark:bg-emerald-400 shadow-[1px_1px_0px_0px_#000]"
+                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    {genre === "ALL" ? "ALL GENRES" : genre}
+                  </button>
+                ))}
+              </div>
+
+              {/* Rows Limit Selector */}
+              <div className="flex items-center gap-1.5 text-xs self-end md:self-auto">
+                <span className="font-bold uppercase text-[11px] text-zinc-500 dark:text-zinc-400 mr-1 select-none">
+                  ROWS:
+                </span>
+                {([10, 25, 50, "ALL"] as const).map((limit) => (
+                  <button
+                    key={limit}
+                    onClick={() => setRowLimit(limit)}
+                    className={`px-2 py-0.5 text-[11px] font-bold border transition-all ${
+                      rowLimit === limit
+                        ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-300 dark:bg-zinc-100 dark:text-zinc-950 shadow-[1px_1px_0px_0px_#000]"
+                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
+                    }`}
+                  >
+                    {limit}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -352,9 +516,14 @@ export default function Home() {
                     ? "LEADERBOARD // TOP_CONCURRENT_PLAYERS"
                     : "RISING STARS // RAPID_MOMENTUM_BREAKOUTS"}
                 </span>
+                {selectedGenre !== "ALL" && (
+                  <span className="text-emerald-700 dark:text-emerald-400 text-[11px]">
+                    [GENRE: {selectedGenre}]
+                  </span>
+                )}
               </div>
               <span className="text-[11px] font-normal text-zinc-600 dark:text-zinc-400">
-                DISPLAYING: {displayedMetrics.length} ROWS
+                DISPLAYING: {processedMetrics.length} / {metrics.length} GAMES
               </span>
             </div>
 
@@ -362,24 +531,54 @@ export default function Home() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider">
+                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider select-none">
                     <th className="py-3 px-3 w-14 text-center border-r border-zinc-300 dark:border-zinc-800">
                       RANK
                     </th>
-                    <th className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800">
-                      GAME TITLE
+                    <th
+                      onClick={() => handleSort("name")}
+                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>GAME TITLE</span>
+                        {renderSortIndicator("name")}
+                      </div>
                     </th>
-                    <th className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800">
-                      GENRE
+                    <th
+                      onClick={() => handleSort("genre")}
+                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>GENRE</span>
+                        {renderSortIndicator("genre")}
+                      </div>
                     </th>
-                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
-                      CCU
+                    <th
+                      onClick={() => handleSort("ccu")}
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-end">
+                        <span>CCU</span>
+                        {renderSortIndicator("ccu")}
+                      </div>
                     </th>
-                    <th className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800">
-                      24H TREND
+                    <th
+                      onClick={() => handleSort("trend")}
+                      className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-center">
+                        <span>24H TREND</span>
+                        {renderSortIndicator("trend")}
+                      </div>
                     </th>
-                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
-                      VISITS
+                    <th
+                      onClick={() => handleSort("visits")}
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-end">
+                        <span>VISITS</span>
+                        {renderSortIndicator("visits")}
+                      </div>
                     </th>
                     <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
                       UPVOTES
@@ -387,8 +586,14 @@ export default function Home() {
                     <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
                       DOWNVOTES
                     </th>
-                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
-                      APPROVAL
+                    <th
+                      onClick={() => handleSort("approval")}
+                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <div className="flex items-center justify-end">
+                        <span>APPROVAL</span>
+                        {renderSortIndicator("approval")}
+                      </div>
                     </th>
                     <th className="py-3 px-4 text-right">
                       SNAPSHOT
@@ -434,17 +639,17 @@ export default function Home() {
                         </td>
                       </tr>
                     ))
-                  ) : displayedMetrics.length === 0 ? (
+                  ) : processedMetrics.length === 0 ? (
                     <tr>
                       <td
                         colSpan={10}
                         className="py-12 text-center text-zinc-500 font-mono"
                       >
-                        [NO_RECORDS_FOUND_IN_MOTHERDUCK]
+                        [NO_MATCHING_RECORDS_FOUND]
                       </td>
                     </tr>
                   ) : (
-                    displayedMetrics.map((game, idx) => {
+                    processedMetrics.map((game, idx) => {
                       const up = Number(game.upvotes) || 0;
                       const down = Number(game.downvotes) || 0;
                       const totalVotes = up + down;
@@ -513,12 +718,16 @@ export default function Home() {
                             </div>
                           </td>
 
-                          {/* Stylized Pixel Genre Badge */}
+                          {/* Stylized Pixel Genre Badge (Clickable to Filter) */}
                           <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800/80 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46]">
+                            <button
+                              onClick={() => setSelectedGenre(game.genre || "Unclassified")}
+                              title={`Filter by genre: ${game.genre || "Unclassified"}`}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800/90 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] transition-all"
+                            >
                               <span className="text-emerald-500">▶</span>
                               <span>{game.genre || "UNCLASSIFIED"}</span>
-                            </span>
+                            </button>
                           </td>
 
                           {/* CCU */}
