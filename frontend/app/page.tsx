@@ -786,13 +786,13 @@ export default function Home() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b-2 border-zinc-900 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider select-none">
-                    <th className="py-3 px-3 w-14 text-center border-r border-zinc-300 dark:border-zinc-800">
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800/80 bg-zinc-100/60 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 font-semibold uppercase tracking-wider select-none">
+                    <th className="py-3 px-3 w-14 text-center align-middle">
                       RANK
                     </th>
                     <th
                       onClick={() => handleSort("name")}
-                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span>GAME TITLE</span>
@@ -801,7 +801,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("genre")}
-                      className="py-3 px-4 border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span>GENRE</span>
@@ -810,7 +810,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("ccu")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 text-right align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>CCU</span>
@@ -819,7 +819,7 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("trend")}
-                      className="py-3 px-4 text-center border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 text-center align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-center">
                         <span>TREND & TRAJECTORY</span>
@@ -828,75 +828,75 @@ export default function Home() {
                     </th>
                     <th
                       onClick={() => handleSort("visits")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 text-right align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>VISITS</span>
                         {renderSortIndicator("visits")}
                       </div>
                     </th>
-                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                    <th className="py-3 px-4 text-right align-middle">
                       UPVOTES
                     </th>
-                    <th className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800">
+                    <th className="py-3 px-4 text-right align-middle">
                       DOWNVOTES
                     </th>
                     <th
                       onClick={() => handleSort("approval")}
-                      className="py-3 px-4 text-right border-r border-zinc-300 dark:border-zinc-800 cursor-pointer hover:bg-zinc-200 hover:text-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+                      className="py-3 px-4 text-right align-middle cursor-pointer hover:text-zinc-950 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center justify-end">
                         <span>APPROVAL</span>
                         {renderSortIndicator("approval")}
                       </div>
                     </th>
-                    <th className="py-3 px-3 text-center border-r border-zinc-300 dark:border-zinc-800">
+                    <th className="py-3 px-3 text-center align-middle">
                       INSPECT
                     </th>
-                    <th className="py-3 px-4 text-right">
+                    <th className="py-3 px-4 text-right align-middle">
                       SNAPSHOT
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 font-mono">
+                <tbody className="font-mono">
                   {loading ? (
                     Array.from({ length: 10 }).map((_, idx) => (
                       <tr
                         key={idx}
-                        className="animate-pulse bg-zinc-50 dark:bg-zinc-950/40"
+                        className="animate-pulse border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-950/40"
                       >
-                        <td className="py-3.5 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-7 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                        <td className="py-3.5 px-3 text-center align-middle">
+                          <div className="h-4 w-7 bg-zinc-300 dark:bg-zinc-800 mx-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-44 bg-zinc-300 dark:bg-zinc-800" />
+                        <td className="py-3.5 px-4 align-middle">
+                          <div className="h-4 w-44 bg-zinc-300 dark:bg-zinc-800 rounded" />
                         </td>
-                        <td className="py-3.5 px-4 border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-28 bg-zinc-300 dark:bg-zinc-800" />
+                        <td className="py-3.5 px-4 align-middle">
+                          <div className="h-4 w-28 bg-zinc-300 dark:bg-zinc-800 rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-center border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-24 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                        <td className="py-3.5 px-4 text-center align-middle">
+                          <div className="h-4 w-24 bg-zinc-300 dark:bg-zinc-800 mx-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-20 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-20 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-14 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
-                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 mx-auto" />
+                        <td className="py-3.5 px-3 text-center align-middle">
+                          <div className="h-4 w-12 bg-zinc-300 dark:bg-zinc-800 mx-auto rounded" />
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto" />
+                        <td className="py-3.5 px-4 text-right align-middle">
+                          <div className="h-4 w-16 bg-zinc-300 dark:bg-zinc-800 ml-auto rounded" />
                         </td>
                       </tr>
                     ))
@@ -919,87 +919,89 @@ export default function Home() {
                           ? Math.round((up / totalVotes) * 100)
                           : null;
 
-                      // Pixel rank tag styling
+                      // Soft rank tag styling
                       const rankClass =
                         idx === 0
-                          ? "border border-amber-600 bg-amber-200 text-amber-950 dark:bg-amber-900/60 dark:text-amber-200 dark:border-amber-500 font-black shadow-[1px_1px_0px_0px_#000]"
+                          ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold"
                           : idx === 1
-                          ? "border border-zinc-600 bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-500 font-black shadow-[1px_1px_0px_0px_#000]"
+                          ? "bg-zinc-500/15 text-zinc-700 dark:text-zinc-300 font-bold"
                           : idx === 2
-                          ? "border border-orange-600 bg-orange-200 text-orange-950 dark:bg-orange-900/60 dark:text-orange-200 dark:border-orange-500 font-black shadow-[1px_1px_0px_0px_#000]"
-                          : "text-zinc-600 dark:text-zinc-400 font-bold";
+                          ? "bg-orange-500/15 text-orange-700 dark:text-orange-300 font-bold"
+                          : "text-zinc-500 dark:text-zinc-400 font-medium";
 
                       const pct = game.ccu_pct_change;
 
                       return (
                         <tr
                           key={String(game.universe_id) + idx}
-                          className="group/row hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+                          className="group/row hover:bg-zinc-100/80 dark:hover:bg-zinc-800/50 border-b border-zinc-200/50 dark:border-zinc-800/50 transition-colors"
                         >
                           {/* Rank Badge */}
-                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
+                          <td className="py-3.5 px-3 text-center align-middle">
                             <span
-                              className={`inline-block px-1.5 py-0.5 text-[11px] ${rankClass}`}
+                              className={`inline-block px-2 py-0.5 text-[11px] rounded ${rankClass}`}
                             >
                               #{idx + 1}
                             </span>
                           </td>
 
-                          {/* Game Title with Direct Roblox Link */}
-                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800">
-                            <a
-                              href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
-                                game.name
-                              )}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title={`Play ${game.name} on Roblox`}
-                              className="group inline-flex items-center gap-1 font-bold text-zinc-950 dark:text-zinc-100 hover:text-emerald-600 dark:hover:text-emerald-400 group-hover/row:text-emerald-600 dark:group-hover/row:text-emerald-400 transition-colors"
-                            >
-                              <span className="group-hover:underline underline-offset-2">
-                                {game.name}
-                              </span>
-                              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 inline-block">
-                                ↗
-                              </span>
-                            </a>
-                            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono mt-0.5 flex items-center gap-2">
-                              <span>ID: {String(game.universe_id)}</span>
-                              <span>•</span>
+                          {/* Game Title with Minimal Hover Play Icon and Muted ID */}
+                          <td className="py-3.5 px-4 align-middle">
+                            <div className="flex items-center gap-2">
                               <a
                                 href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
                                   game.name
                                 )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+                                title={`Play ${game.name} on Roblox`}
+                                className="font-bold text-zinc-950 dark:text-zinc-100 hover:text-brand-main dark:hover:text-brand-light transition-colors truncate max-w-[200px] sm:max-w-xs md:max-w-sm inline-block"
                               >
-                                [PLAY ↗]
+                                {game.name}
                               </a>
+                              <a
+                                href={`https://www.roblox.com/discover/?Keyword=${encodeURIComponent(
+                                  game.name
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={`Play ${game.name} on Roblox`}
+                                className="opacity-0 group-hover/row:opacity-100 text-brand-main dark:text-brand-light hover:scale-110 transition-all flex items-center shrink-0"
+                              >
+                                <svg
+                                  className="w-3.5 h-3.5 fill-current"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </a>
+                            </div>
+                            <div className="text-xs text-zinc-600 dark:text-zinc-500 font-mono mt-0.5">
+                              ID: {String(game.universe_id)}
                             </div>
                           </td>
 
-                          {/* Stylized Pixel Genre Badge (Clickable to Filter) */}
-                          <td className="py-3 px-4 border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
+                          {/* Softened Genre Badge */}
+                          <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                             <button
                               onClick={() => setSelectedGenre(game.genre || "Unclassified")}
                               title={`Filter by genre: ${game.genre || "Unclassified"}`}
-                              className="inline-flex items-center gap-1 px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-300 hover:text-zinc-950 dark:hover:bg-zinc-700 dark:hover:text-white text-zinc-800 dark:text-zinc-200 text-[11px] font-bold shadow-[2px_2px_0px_0px_#000] dark:shadow-[2px_2px_0px_0px_#3f3f46] transition-all"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-brand-main/10 hover:bg-brand-main/20 text-brand-main dark:text-brand-light font-medium text-[11px] transition-colors"
                             >
-                              <span className="text-emerald-500">▶</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand-main dark:bg-brand-light shrink-0" />
                               <span>{game.genre || "UNCLASSIFIED"}</span>
                             </button>
                           </td>
 
-                          {/* CCU */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
-                            <span className="inline-block px-2 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-black text-xs shadow-[2px_2px_0px_0px_#059669]">
-                              {Number(game.ccu).toLocaleString()} CCU
+                          {/* Clean Softened CCU Numbers */}
+                          <td className="py-3.5 px-4 text-right align-middle whitespace-nowrap">
+                            <span className="inline-block px-2.5 py-1 rounded bg-brand-main/10 text-brand-dark dark:text-brand-light font-bold text-xs">
+                              {Number(game.ccu).toLocaleString()}
                             </span>
                           </td>
 
                           {/* Trend & Trajectory Sparkline */}
-                          <td className="py-3 px-4 text-center border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap">
+                          <td className="py-3.5 px-4 text-center align-middle whitespace-nowrap">
                             <div className="flex items-center justify-center gap-2">
                               <Sparkline
                                 data={game.ccu_history}
@@ -1014,52 +1016,52 @@ export default function Home() {
                                 }
                               />
                               {pct === null || pct === undefined ? (
-                                <span className="inline-flex items-center px-1.5 py-0.5 border border-cyan-600 dark:border-cyan-500 bg-cyan-100 text-cyan-950 dark:bg-cyan-950/80 dark:text-cyan-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#0891b2]">
-                                  ★ NEW
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-semibold text-[11px]">
+                                  NEW
                                 </span>
                               ) : pct > 0 ? (
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 border border-emerald-600 dark:border-emerald-500 bg-emerald-100 text-emerald-950 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#059669]">
+                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-brand-main/15 text-brand-dark dark:text-brand-light font-semibold text-[11px]">
                                   <span>+{pct}%</span>
                                   <span>▲</span>
                                 </span>
                               ) : pct < 0 ? (
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 border border-rose-600 dark:border-rose-500 bg-rose-100 text-rose-950 dark:bg-rose-950/80 dark:text-rose-300 font-bold text-[10px] shadow-[1px_1px_0px_0px_#e11d48]">
+                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold text-[11px]">
                                   <span>{pct}%</span>
                                   <span>▼</span>
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-1.5 py-0.5 border border-zinc-400 dark:border-zinc-700 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 font-bold text-[10px]">
-                                  0.0% ━
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 font-medium text-[11px]">
+                                  0.0%
                                 </span>
                               )}
                             </div>
                           </td>
 
                           {/* Total Visits */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 font-bold text-zinc-700 dark:text-zinc-200 group-hover/row:text-zinc-950 dark:group-hover/row:text-white">
+                          <td className="py-3.5 px-4 text-right align-middle font-medium text-zinc-700 dark:text-zinc-300">
                             {Number(game.visits).toLocaleString()}
                           </td>
 
                           {/* Upvotes */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 text-emerald-600 dark:text-emerald-400 font-bold">
+                          <td className="py-3.5 px-4 text-right align-middle text-emerald-600 dark:text-emerald-400 font-medium">
                             ▲ {up.toLocaleString()}
                           </td>
 
                           {/* Downvotes */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-400 font-bold">
+                          <td className="py-3.5 px-4 text-right align-middle text-rose-600 dark:text-rose-400 font-medium">
                             ▼ {down.toLocaleString()}
                           </td>
 
-                          {/* Approval Rating */}
-                          <td className="py-3 px-4 text-right border-r border-zinc-200 dark:border-zinc-800 font-bold">
+                          {/* Softened Approval Rating */}
+                          <td className="py-3.5 px-4 text-right align-middle whitespace-nowrap">
                             {rating !== null ? (
                               <span
-                                className={`px-1.5 py-0.5 border text-[11px] ${
+                                className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${
                                   rating >= 80
-                                    ? "border-emerald-600 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-300"
+                                    ? "bg-brand-main/15 text-brand-dark dark:text-brand-light"
                                     : rating >= 60
-                                    ? "border-amber-600 text-amber-700 bg-amber-50 dark:bg-amber-950/50 dark:text-amber-300"
-                                    : "border-rose-600 text-rose-700 bg-rose-50 dark:bg-rose-950/50 dark:text-rose-300"
+                                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                                    : "bg-rose-500/15 text-rose-700 dark:text-rose-300"
                                 }`}
                               >
                                 {rating}%
@@ -1069,18 +1071,18 @@ export default function Home() {
                             )}
                           </td>
 
-                          {/* Inspector Action Button */}
-                          <td className="py-3 px-3 text-center border-r border-zinc-200 dark:border-zinc-800">
+                          {/* Ghost Inspect Button */}
+                          <td className="py-3.5 px-3 text-center align-middle">
                             <button
                               onClick={() => setSelectedGame(game)}
-                              className="px-2 py-0.5 border border-zinc-800 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-emerald-400 hover:text-zinc-950 dark:hover:bg-emerald-400 dark:hover:text-zinc-950 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold uppercase shadow-[1px_1px_0px_0px_#000] dark:shadow-[1px_1px_0px_0px_#3f3f46] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                              className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/50 dark:hover:text-white rounded px-2.5 py-1 transition-colors font-medium inline-flex items-center gap-1"
                             >
-                              🔍 INFO
+                              <span>INFO</span>
                             </button>
                           </td>
 
                           {/* Snapshot Timestamp */}
-                          <td className="py-3 px-4 text-right text-zinc-500 dark:text-zinc-400 group-hover/row:text-zinc-700 dark:group-hover/row:text-zinc-200 whitespace-nowrap text-[11px]">
+                          <td className="py-3.5 px-4 text-right align-middle text-zinc-500 dark:text-zinc-400 whitespace-nowrap text-[11px]">
                             {game.timestamp
                               ? new Date(game.timestamp).toLocaleTimeString(
                                   [],

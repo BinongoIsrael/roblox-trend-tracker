@@ -8,6 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        "brand-darkest": "#091413",
+        "brand-dark": "#285A48",
+        "brand-main": "#408A71",
+        "brand-light": "#B0E4CC",
+      },
       fontFamily: {
         mono: [
           "var(--font-geist-mono)",
