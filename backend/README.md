@@ -95,8 +95,8 @@ flowchart TD
 | :--- | :--- | :--- |
 | **`scraper.py`** | High-throughput asynchronous ingestion pipeline. Pulls top trending universe IDs from the Explore API, chunks queries into batches of 50, polls game statistics, handles rate limiting, writes snapshots to MotherDuck, and enforces 30-day retention. | `aiohttp`, `asyncio`, `duckdb`, `python-dotenv` |
 | **`init_db.py`** | Initializes the MotherDuck database (`md:roblox_trends`), creates the `games` and `metrics` relational tables, sets primary/foreign key constraints, and validates schema integrity. | `duckdb`, `python-dotenv` |
-| **`update_schema.py`** | Automated clustering migration. Extracts text features from all stored experiences, trains K-Means models, and updates `games.cluster_label` directly in MotherDuck. | `duckdb`, `scikit-learn`, `pandas` |
-| **`genre_clustering.py`** | Machine learning exploration script. Preprocesses titles/descriptions, extracts TF-IDF n-grams, computes silhouette scores across candidate $k \in [3, 7]$, and prints a formatted market-share terminal report. | `scikit-learn`, `numpy`, `pandas`, `duckdb` |
+| **`update_schema.py`** | Automated clustering runner. Directly delegates to `genre_clustering.py` so scheduled GitHub Actions executions continuously apply the refined NLP model. | `duckdb`, `scikit-learn`, `pandas` |
+| **`genre_clustering.py`** | Core machine learning clustering and labeling pipeline. Preprocesses titles/descriptions with custom Roblox stop-word filters, boosts gameplay keywords, extracts TF-IDF n-grams (`max_features=200`), tunes $k \in [3, 7]$ via Silhouette score, outputs a formatted market-share terminal report, and updates `cluster_label` directly in MotherDuck. | `scikit-learn`, `numpy`, `pandas`, `duckdb` |
 | **`discord_alerts.py`** | Real-time momentum monitoring script. Detects experiences surging $\ge 15\%$ CCU or gaining $\ge 5,000$ active players, formatting rich Discord embeds with play links and stats. | `urllib.request`, `duckdb`, `python-dotenv` |
 | **`dashboard.py`** | Interactive analytical web dashboard for local exploration, rendering KPI cards, top-game rankings, genre player shares, and multi-line time-series trend charts. | `streamlit`, `plotly.express`, `duckdb` |
 | **`requirements.txt`** | Dependency manifest specifying core analytical, machine learning, and visualization libraries. | `pip` |
@@ -193,13 +193,14 @@ duckdb.connect(f"md:roblox_trends?motherduck_token={os.environ.get('MOTHERDUCK_T
 
 ### 3. NLP Text Preprocessing & Sub-Genre Clustering
 
-Roblox experience genres are frequently broad (e.g. "Simulation" or "Action"). To identify emergent trends (e.g., *Brainrot simulators*, *treadmill steal games*, *anime duels*, or *mascot horror*), `genre_clustering.py` and `update_schema.py` employ machine learning:
+Roblox experience genres are frequently broad (e.g. "Simulation" or "Action"). To identify emergent trends (e.g., *anime combat*, *treadmill steal games*, *mascot horror*, or *competitive FPS duels*), `genre_clustering.py` employs a robust NLP and unsupervised clustering pipeline:
 
-1. **Text Cleansing**: Concatenates game title and developer description, lowercases text, removes punctuation and emoji artifacts using regex (`[^a-zA-Z\s]`), and removes English stop words.
-2. **TF-IDF Feature Extraction**: Uses `TfidfVectorizer(max_features=100, ngram_range=(1, 2))` to extract top unigrams and bigrams.
-3. **K-Means Clustering & Silhouette Optimization**: Iterates through candidate cluster counts $k \in [3, 7]$ calculating the **Silhouette Score** to mathematically determine the optimal cluster count.
-4. **Centroid Keyword Labeling**: Extracts the top 3-5 centroid keywords to generate human-readable sub-genre labels (e.g., `Steal / Eggs / Treadmill`, `Game / Skins / Aim`, `Horror / Escape / Survival`).
-5. **Database Sync**: `update_schema.py` updates `games.cluster_label` in MotherDuck so both the Next.js frontend and Streamlit dashboard reflect the latest clustering model.
+1. **Robust Stop-Word Filtering**: Eliminates standard English stop-words alongside a customized Roblox stop-word dictionary (`ROBLOX_STOP_WORDS`) that strips non-informative platform noise (`game`, `play`, `player`, `players`, `new`, `update`, `like`, `likes`, `favorite`, `leave`, `join`, `group`, `time`, `experience`, `code`, `codes`, `free`, `beta`, `alpha`, `release`, `build`, `robux`, `controls`, `desktop`, `mobile`, etc.).
+2. **Title Weighting & Gameplay Keyword Prioritization**: Game titles carry concentrated genre signals, so title tokens are weighted and actual gameplay keywords (`simulator`, `tycoon`, `obby`, `rpg`, `fps`, `roleplay`, `pvp`, `survival`, `pets`, `anime`, `horror`, `duels`, `arena`, `speed`, `hatch`, etc.) are boosted.
+3. **TF-IDF Feature Extraction**: Uses `TfidfVectorizer(max_features=200, ngram_range=(1, 2), min_df=2)` with the combined stop-word set to capture high-signal unigrams and bigrams.
+4. **K-Means Clustering & Silhouette Optimization**: Evaluates candidate cluster counts $k \in [3, 7]$ to select the optimal cluster configuration maximizing the Silhouette score.
+5. **Gameplay Centroid Labeling**: Analyzes centroid feature weights and prioritizes gameplay-specific terms to construct clean, intuitive labels (e.g., `Anime / Action / Horror`, `Steal / Pets / Speed`, `Duels / Arena / FPS`), preserving gaming acronyms in uppercase (`FPS`, `PVP`, `RP`, `RPG`).
+6. **Database Persistence**: Directly executes SQL updates to overwrite `games.cluster_label` in MotherDuck (and local DuckDB), ensuring both the Next.js frontend and Streamlit dashboard immediately surface the recalculated sub-genres. `update_schema.py` delegates directly to this pipeline.
 
 ---
 
@@ -316,8 +317,10 @@ The backend repository includes an automated workflow at [`.github/workflows/scr
 | `scraper.py` | `BATCH_DELAY_SECONDS` | `1.0` | Asynchronous wait time between batches to prevent Cloudflare 429 errors. |
 | `scraper.py` | `REQUEST_TIMEOUT` | `8.0`s | HTTP request timeout before failing over to the proxy mirror. |
 | `scraper.py` | Retention Window | `30 days` | Automatic cleanup threshold for old `metrics` rows. |
-| `genre_clustering.py` | `max_features` | `100` | Maximum vocabulary size for TF-IDF feature matrix. |
+| `genre_clustering.py` | `max_features` | `200` | Maximum vocabulary size for TF-IDF feature matrix. |
 | `genre_clustering.py` | `ngram_range` | `(1, 2)` | Unigram and bigram extraction window for game descriptions. |
+| `genre_clustering.py` | `ROBLOX_STOP_WORDS` | `CUSTOM_STOP_WORDS` | Set of generic Roblox noise words removed alongside English stop words. |
+| `genre_clustering.py` | `GAMEPLAY_KEYWORDS` | `Set[str]` | High-priority gameplay genres & mechanics boosted during labeling & clustering. |
 | `genre_clustering.py` | `--k` | `None` (auto) | Set a fixed cluster count (e.g. `--k 5`) or leave unset for automatic silhouette optimization. |
 | `discord_alerts.py` | `min_pct_surge` | `15.0%` | Minimum percentage jump in CCU required to trigger a Discord notification. |
 | `discord_alerts.py` | `min_ccu_diff` | `5,000` | Minimum absolute player increase required to trigger a Discord notification. |

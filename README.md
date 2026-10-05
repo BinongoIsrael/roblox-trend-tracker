@@ -128,7 +128,10 @@ rob-trend-tracker/
 
 ### 2. Machine Learning Sub-Genre Discovery
 - Roblox standard genres ("Simulation", "Action") are often generic.
-- The pipeline uses **TF-IDF n-gram vectorization** (`(1, 2)` n-grams) on concatenated titles and developer descriptions, combined with **K-Means clustering** and **Silhouette score optimization** ($k \in [3, 7]$) to generate descriptive sub-genres (e.g., `Steal / Eggs / Treadmill`, `Horror / Escape / Survival`, `Aim / Skins / Battle`).
+- The pipeline uses a custom-tailored NLP pipeline in `backend/genre_clustering.py` combining standard English stop-words with a robust Roblox-specific stop-word filter (`game`, `play`, `players`, `update`, `like`, `favorite`, `join`, `group`, `time`, `experience`, `code`, `codes`, `free`, `beta`, `alpha`, `release`, `build`, etc.).
+- Emphasizes game title tokens and prioritizes actual gameplay keywords (`simulator`, `tycoon`, `obby`, `rpg`, `fps`, `roleplay`, `pvp`, `survival`, `pets`, `anime`, `horror`, `duels`, `arena`, etc.).
+- Vectorizes text with TF-IDF (`max_features=200`, `(1, 2)` n-grams, `min_df=2`) and uses K-Means clustering with Silhouette score optimization ($k \in [3, 7]$) to generate clean, gameplay-focused sub-genre labels (e.g., `Anime / Action / Horror`, `Steal / Pets / Speed`, `Duels / Arena / FPS`, `Survive / Fight / Horror`).
+- Automatically updates and persists the assignments directly to `cluster_label` in MotherDuck.
 
 ### 3. Discord Player Surge Alerts
 - `backend/discord_alerts.py` evaluates recent snapshots to identify breakout experiences:
